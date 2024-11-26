@@ -154,7 +154,6 @@ const DetailMutasi = () => {
         </CardHeader>
         <CardContent>
           <p><strong>Nama:</strong> {data.nama}</p>
-          <p><strong>Status Mutasi:</strong> {data.status_mutasi}</p>
           <p><strong>Unit Lama:</strong> {data.unit} ({data.sub_unit})</p>
           <p><strong>Posisi Lama:</strong> {data.posisi_pekerjaan}</p>
         </CardContent>

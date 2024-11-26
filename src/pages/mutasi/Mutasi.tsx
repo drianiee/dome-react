@@ -100,8 +100,13 @@ const Mutasi = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredKaryawan, setFilteredKaryawan] = useState<Karyawan[]>([]);
   const navigate = useNavigate();
+  const [userRole, setUserRole] = useState<number | null>(null); // Track user role
 
   useEffect(() => {
+    const getUserRole = () => {
+      const role = localStorage.getItem("role"); // Assuming role is saved in localStorage
+      setUserRole(role ? parseInt(role) : null); // Ensure role is parsed as an integer
+    };
     const getData = async () => {
       try {
         const response = await fetchMutasiData();
@@ -113,6 +118,7 @@ const Mutasi = () => {
     };
 
     getData();
+    getUserRole();
   }, []);
 
   useEffect(() => {
@@ -159,9 +165,12 @@ const Mutasi = () => {
         <div className="text-red-500 text-center">{error}</div>
       ) : (
         <>
+        {userRole === 2 && (
           <div className="mb-4">
             <Button onClick={handleAddMutasi}>Add Mutasi</Button>
-          </div>
+          </div>      
+        )}
+
 
           <Table>
             <TableCaption>Daftar Mutasi Karyawan</TableCaption>

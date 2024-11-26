@@ -1,6 +1,5 @@
 import { Calendar, Home, Inbox, LogOut } from "lucide-react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-
 import {
   Sidebar,
   SidebarContent,
@@ -16,19 +15,18 @@ import {
 const items = [
   {
     title: "Dashboard",
-    url: "/dashboard", // Path ke halaman Dashboard
+    url: "/dashboard",
     icon: Home,
   },
   {
     title: "List Karyawan",
-    url: "/list-karyawan", // Path ke halaman List Karyawan
+    url: "/list-karyawan",
     icon: Inbox,
-    // Tambahkan kondisi aktif untuk Detail Karyawan juga
-    matchPaths: ["/list-karyawan", "/karyawan/"], // Semua URL yang cocok untuk aktif
+    matchPaths: ["/list-karyawan", "/karyawan/"],
   },
   {
     title: "Mutasi",
-    url: "/mutasi", // Path ke halaman Mutasi
+    url: "/mutasi",
     matchPaths: ["/mutasi"],
     icon: Calendar,
   },
@@ -36,13 +34,15 @@ const items = [
 
 export function AppSidebar() {
   const navigate = useNavigate();
-  const location = useLocation(); // Digunakan untuk mengetahui path URL saat ini
+  const location = useLocation(); 
+
+  // Retrieve user information from localStorage
+  const user = localStorage.getItem("user");
+  const userData = user ? JSON.parse(user) : null;
 
   const handleLogout = () => {
-    // Hapus token atau data autentikasi lainnya
     localStorage.removeItem("token");
-
-    // Redirect ke halaman login
+    localStorage.removeItem("user");
     navigate("/");
   };
 
@@ -57,15 +57,8 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    isActive={
-                      item.matchPaths
-                        ? item.matchPaths.some((path) =>
-                            location.pathname.startsWith(path)
-                          ) // Cek jika path cocok
-                        : location.pathname === item.url
-                    } // Tandai menu aktif
+                    isActive={item.matchPaths ? item.matchPaths.some((path) => location.pathname.startsWith(path)) : location.pathname === item.url}
                   >
-                    {/* Gunakan Link dari react-router-dom */}
                     <Link to={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
@@ -73,18 +66,24 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              {/* Logout Button */}
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <button onClick={handleLogout}>
-                    <LogOut />
-                    <span>Logout</span>
-                  </button>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* User Data and Logout Button */}
+        {userData && (
+          <div className="mt-auto p-4 bg-gray-100">
+            <div className="text-sm font-medium text-gray-600">{userData.name}</div>
+            <div className="text-xs text-gray-400">{userData.username}</div>
+            <button
+              onClick={handleLogout}
+              className="mt-10 flex items-center w-full h-12"
+            >
+              <LogOut className="mr-2 w-4" />
+              <span>Logout</span>
+            </button>
+          </div>
+        )}
       </SidebarContent>
     </Sidebar>
   );
