@@ -91,7 +91,6 @@ const fetchAllKaryawanData = async (): Promise<Karyawan[]> => {
 
   return allData;
 };
-
 const Mutasi = () => {
   const [data, setData] = useState<Mutasi[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -154,8 +153,42 @@ const Mutasi = () => {
     setIsDialogOpen(true);
   };
 
+  const handleDelete = async (perner: string) => {
+    const confirmDelete = window.confirm(`Yakin ingin menghapus mutasi dengan perner ${perner}?`);
+    if (!confirmDelete) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Token tidak ditemukan. Silakan login kembali.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://d8w8k0c8cw008wccwcg0cw4c.77.37.45.61.sslip.io/mutasi/${perner}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        // Hapus data dari state setelah berhasil
+        setData((prevData) => prevData.filter((mutasi) => mutasi.perner !== perner));
+        alert("Mutasi berhasil dihapus.");
+      } else {
+        alert("Gagal menghapus mutasi.");
+      }
+    } catch (err) {
+      console.error("Error saat menghapus data:", err);
+      alert("Terjadi kesalahan. Silakan coba lagi.");
+    }
+  };
+
   const handleKaryawanClick = (nama: string) => {
-    // Navigasi ke link baru dengan nama sebagai parameter URL
     navigate(`/mutasi/add-mutasi/${encodeURIComponent(nama)}`);
   };
 
@@ -165,12 +198,11 @@ const Mutasi = () => {
         <div className="text-red-500 text-center">{error}</div>
       ) : (
         <>
-        {userRole === 2 && (
-          <div className="mb-4">
-            <Button onClick={handleAddMutasi}>Add Mutasi</Button>
-          </div>      
-        )}
-
+          {userRole === 2 && (
+            <div className="mb-4">
+              <Button onClick={handleAddMutasi}>Add Mutasi</Button>
+            </div>
+          )}
 
           <Table>
             <TableCaption>Daftar Mutasi Karyawan</TableCaption>
@@ -218,12 +250,22 @@ const Mutasi = () => {
                       })}
                     </TableCell>
                     <TableCell>
-                      <button
-                        onClick={() => handleDetailClick(mutasi.perner)}
-                        className="text-blue-500 hover:underline"
-                      >
-                        Detail
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleDetailClick(mutasi.perner)}
+                          className="text-blue-500 hover:underline"
+                        >
+                          Detail
+                        </button>
+                        {userRole === 2 && (
+                          <button
+                            onClick={() => handleDelete(mutasi.perner)}
+                            className="text-red-500 hover:underline"
+                          >
+                            Hapus
+                          </button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -237,6 +279,7 @@ const Mutasi = () => {
             </TableBody>
           </Table>
 
+          {/* Dialog untuk Add Mutasi */}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogContent>
               <DialogHeader>
@@ -264,7 +307,7 @@ const Mutasi = () => {
                       filteredKaryawan.map((karyawan) => (
                         <TableRow
                           key={karyawan.perner}
-                          onClick={() => handleKaryawanClick(karyawan.nama)} // Klik untuk navigasi
+                          onClick={() => handleKaryawanClick(karyawan.nama)}
                           className="cursor-pointer hover:bg-gray-100"
                         >
                           <TableCell>{karyawan.perner}</TableCell>
