@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Untuk navigasi
+import ListKaryawanHeader from '../../assets/ListKaryawanHeader.png';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"; 
 import {
   Table,
   TableBody,
@@ -53,20 +61,30 @@ const fetchData = async (page: number): Promise<any> => {
 };
 
 const ListKaryawan = () => {
-  const [data, setData] = useState<Karyawan[]>([]);
-  const [filteredData, setFilteredData] = useState<Karyawan[]>([]); // Data setelah filter
+  const [data, setData] = useState<Karyawan[]>([]); // Data asli
   const [search, setSearch] = useState<string>(""); // State untuk pencarian
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const [filterSumberAnggaran, setFilterSumberAnggaran] = useState("");
+  const [filterUnit, setFilterUnit] = useState("");
+
+  // Filter data di sini (variabel lokal, bukan state)
+  const filteredData = data
+    .filter((karyawan) =>
+      karyawan.nama.toLowerCase().includes(search.toLowerCase())
+    )
+    .filter((karyawan) =>
+      filterSumberAnggaran ? karyawan.sumber_anggaran === filterSumberAnggaran : true
+    )
+    .filter((karyawan) => (filterUnit ? karyawan.unit === filterUnit : true));
 
   useEffect(() => {
     const getData = async () => {
       try {
         const response = await fetchData(currentPage);
-        setData(response.data || []);
-        setFilteredData(response.data || []); // Set filtered data awal
+        setData(response.data || []); // Set data asli
         setCurrentPage(response.currentPage || 1);
         setTotalPages(response.totalPages || 1);
         setError(null);
@@ -81,8 +99,7 @@ const ListKaryawan = () => {
           setError("Gagal mengambil data. Periksa koneksi Anda.");
         }
 
-        setData([]);
-        setFilteredData([]); // Kosongkan filtered data jika gagal
+        setData([]); // Kosongkan data jika gagal
       }
     };
 
@@ -98,63 +115,112 @@ const ListKaryawan = () => {
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.toLowerCase();
-    setSearch(value);
-
-    // Filter data berdasarkan nama
-    const filtered = data.filter((karyawan) =>
-      karyawan.nama.toLowerCase().includes(value)
-    );
-    setFilteredData(filtered);
+    setSearch(e.target.value.toLowerCase());
   };
 
   return (
-    <div className="p-20">
+    <div className="p-8">
+      {/* Banner Section */}
+      <div
+        className="bg-cover bg-center rounded-lg mb-8 h-[180px]"
+        style={{ backgroundImage: `url(${ListKaryawanHeader})` }}
+      >
+        <div className="p-8 text-white">
+          <div className="flex gap-2 mb-4">
+            <p className="text-xl text-[#FF0000]">#</p>
+            <p className="text-xl text-gray-300">Elevating Your Future</p>
+          </div>
+          <h1 className="text-6xl font-bold">List Karyawan</h1>
+        </div>
+      </div>
+
       {error ? (
         <div className="text-red-500 text-center">{error}</div>
       ) : (
         <>
-          {/* Input Search */}
-          <div className="mb-4">
-            <Input
-              type="text"
-              placeholder="Cari karyawan berdasarkan nama..."
-              value={search}
-              onChange={handleSearchChange}
-            />
+          {/* Search and Filter Section */}
+          <div className="mb-4 flex gap-4 w-full">
+            {/* Input Search */}
+            <div className="flex-grow w-3/5">
+              <Input
+                type="text"
+                placeholder="Cari karyawan berdasarkan nama..."
+                value={search}
+                onChange={handleSearchChange}
+              />
+            </div>
+
+            {/* Filter by Sumber Anggaran */}
+            <div className="w-1/5">
+             <Select onValueChange={setFilterSumberAnggaran}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sumber Anggaran" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Semua Sumber Anggaran</SelectItem>
+                  {Array.from(new Set(data.map((karyawan) => karyawan.sumber_anggaran)))
+                    .filter((sumber) => sumber) // Hapus nilai undefined atau kosong
+                    .map((sumber, index) => (
+                      <SelectItem key={index} value={sumber}>
+                        {sumber}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Filter by Unit */}
+            <div className="w-1/5">
+              <Select onValueChange={setFilterUnit}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Unit" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Semua Unit</SelectItem>
+                  {Array.from(new Set(data.map((karyawan) => karyawan.unit)))
+                    .filter((unit) => unit) // Hapus nilai undefined atau kosong
+                    .map((unit, index) => (
+                      <SelectItem key={index} value={unit}>
+                        {unit}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
+          {/* Table Section */}
           <Table>
             <TableCaption>Daftar Karyawan</TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead>Perner</TableHead>
-                <TableHead>Nama</TableHead>
-                <TableHead>Take Home Pay</TableHead>
-                <TableHead>Unit</TableHead>
-                <TableHead>Sub Unit</TableHead>
-                <TableHead>Posisi</TableHead>
-                <TableHead>Sumber Anggaran</TableHead>
-                <TableHead>Aksi</TableHead>
+                <TableHead className="font-bold w-4">Perner</TableHead>
+                <TableHead className="font-bold w-20">Nama</TableHead>
+                <TableHead className="font-bold w-32">Take Home Pay</TableHead>
+                <TableHead className="font-bold w-40">Unit</TableHead>
+                <TableHead className="font-bold w-40">Sub Unit</TableHead>
+                <TableHead className="font-bold w-20">Posisi</TableHead>
+                <TableHead className="font-bold w-20">Sumber Anggaran</TableHead>
+                <TableHead className="font-bold w-12">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredData.length > 0 ? (
                 filteredData.map((karyawan) => (
                   <TableRow key={karyawan.perner}>
-                    <TableCell>{karyawan.perner}</TableCell>
-                    <TableCell>{karyawan.nama}</TableCell>
-                    <TableCell>
+                    <TableCell className="w-4">{karyawan.perner}</TableCell>
+                    <TableCell className="w-20">{karyawan.nama}</TableCell>
+                    <TableCell className="w-32">
                       {parseFloat(karyawan.take_home_pay).toLocaleString("id-ID", {
                         style: "currency",
                         currency: "IDR",
                       })}
                     </TableCell>
-                    <TableCell>{karyawan.unit}</TableCell>
-                    <TableCell>{karyawan.sub_unit}</TableCell>
-                    <TableCell>{karyawan.posisi_pekerjaan}</TableCell>
-                    <TableCell>{karyawan.sumber_anggaran}</TableCell>
-                    <TableCell>
+                    <TableCell className="w-40">{karyawan.unit}</TableCell>
+                    <TableCell className="w-40">{karyawan.sub_unit}</TableCell>
+                    <TableCell className="w-20">{karyawan.posisi_pekerjaan}</TableCell>
+                    <TableCell className="w-20">{karyawan.sumber_anggaran}</TableCell>
+                    <TableCell className="w-12">
                       <button
                         onClick={() => handleDetailClick(karyawan.perner)}
                         className="text-blue-500 hover:underline"
@@ -174,6 +240,7 @@ const ListKaryawan = () => {
             </TableBody>
           </Table>
 
+          {/* Pagination */}
           <Pagination className="mt-4">
             <PaginationContent>
               <PaginationItem>
@@ -217,5 +284,6 @@ const ListKaryawan = () => {
     </div>
   );
 };
+
 
 export default ListKaryawan;

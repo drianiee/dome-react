@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import MutasiHeader from '../../assets/ListKaryawanHeader.png';
 import {
   Table,
   TableBody,
@@ -99,6 +100,7 @@ const Mutasi = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredKaryawan, setFilteredKaryawan] = useState<Karyawan[]>([]);
   const navigate = useNavigate();
+  const [search, setSearch] = useState<string>(""); // State untuk pencarian
   const [userRole, setUserRole] = useState<number | null>(null); // Track user role
 
   useEffect(() => {
@@ -192,17 +194,46 @@ const Mutasi = () => {
     navigate(`/mutasi/add-mutasi/${encodeURIComponent(nama)}`);
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value.toLowerCase());
+  };
+
   return (
-    <div className="p-20">
+    <div className="p-8">
+      {/* Banner Section */}
+      <div
+        className="bg-cover bg-center rounded-lg mb-8 h-[180px]"
+        style={{ backgroundImage: `url(${MutasiHeader})` }}
+      >
+        <div className="p-8 text-white">
+          <div className="flex gap-2 mb-4">
+            <p className="text-xl text-[#FF0000]">#</p>
+            <p className="text-xl text-gray-300">Elevating Your Future</p>
+          </div>
+          <h1 className="text-6xl font-bold">List Mutasi</h1>
+        </div>
+      </div>
+
       {error ? (
         <div className="text-red-500 text-center">{error}</div>
       ) : (
         <>
-          {userRole === 2 && (
-            <div className="mb-4">
+          <div className="mb-4 flex gap-4 w-full">
+            {/* Input Search */}
+            <div className="flex-grow w-full">
+              <Input
+                type="text"
+                placeholder="Cari karyawan berdasarkan nama..."
+                value={search}
+                onChange={handleSearchChange}
+              />
+            </div>
+            
+            <div className="w-full">
               <Button onClick={handleAddMutasi}>Add Mutasi</Button>
             </div>
-          )}
+          </div>
+          
 
           <Table>
             <TableCaption>Daftar Mutasi Karyawan</TableCaption>
