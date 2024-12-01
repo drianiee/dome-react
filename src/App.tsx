@@ -10,6 +10,8 @@ import DetailKaryawan from "./pages/listkaryawan/DetailKaryawan";
 import DetailMutasi from "./pages/mutasi/DetailMutasi";
 import AddMutasi from "./pages/mutasi/AddMutasi";
 
+import ListPenilaian from "./pages/penilaian/listpenilaian"
+
 function App() {
   return (
     <Router>
@@ -72,6 +74,15 @@ function App() {
           <AddMutasi />
           </Layout>
           } 
+        />
+
+        <Route
+          path="/penilaian"
+          element={
+            <Layout>
+              <ListPenilaian />
+            </Layout>
+          }
         />
 
       </Routes>

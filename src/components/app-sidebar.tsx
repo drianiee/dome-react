@@ -68,7 +68,7 @@ export function AppSidebar() {
           <Link
             to="/penilaian"
             className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium ${
-              location.pathname === "/profile" ? "bg-[#CF3C3C] text-white" : "text-gray-500"
+              location.pathname === "/penilaian" ? "bg-[#CF3C3C] text-white" : "text-gray-500"
             }`}
           >
             <User className="w-5 h-5 mr-3" />
