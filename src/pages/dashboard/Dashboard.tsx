@@ -166,23 +166,24 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="w-full h-72"> {/* Kontainer dengan tinggi tetap */}
-              <ResponsiveContainer width="100%" height="100%"> {/* Lebar mengikuti kontainer */}
-                <BarChart
-                  data={filteredUnitData}
-                  margin={{ top: 10, right: 10, left: -22, bottom: 30 }} // Margin dioptimalkan
-                >
-                  <CartesianGrid strokeDasharray="2 2" />
-                  <XAxis
-                    dataKey="bulan"
-                    interval={0} // Menampilkan semua bulan
-                    tickMargin={10} // Memberi jarak antara label dan sumbu
-                    tickFormatter={(value) => value.substring(0, 3)} // Menampilkan 3 huruf pertama dari bulan
-                  />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="jumlah" fill="#007bff" />
-                </BarChart>
-              </ResponsiveContainer>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={filteredUnitData}
+                margin={{ top: 10, right: 10, left: -22, bottom: 30 }}
+              >
+                <CartesianGrid strokeDasharray="2 2" />
+                <XAxis
+                  dataKey="bulan"
+                  interval={0}
+                  tickMargin={10}
+                  tickFormatter={(value) => value.substring(0, 3)}
+                />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="jumlah" fill="#007bff" />
+              </BarChart>
+            </ResponsiveContainer>
+
             </div>
           </CardContent>
 
@@ -208,9 +209,10 @@ const Dashboard = () => {
                     cy="50%"
                     outerRadius={70}
                   >
-                    {genderChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
+                  {genderChartData.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+
                   </Pie>
                   <Tooltip />
                 </PieChart>
@@ -242,9 +244,9 @@ const Dashboard = () => {
                     cy="50%"
                     outerRadius={70}
                   >
-                    {ageChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
+                  {ageChartData.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
                   </Pie>
                   <Tooltip />
                 </PieChart>
