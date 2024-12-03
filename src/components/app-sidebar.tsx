@@ -7,8 +7,8 @@ export function AppSidebar() {
   const location = useLocation();
 
   // Retrieve user information from localStorage
-  const user = localStorage.getItem("user");
-  const userData = user ? JSON.parse(user) : null;
+  // const user = localStorage.getItem("user");
+  // const userData = user ? JSON.parse(user) : null;
 
   const handleLogout = () => {
     localStorage.removeItem("token");
