@@ -40,7 +40,7 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
     throw new Error("Token tidak ditemukan. Silakan login kembali.");
   }
 
-  const response = await fetch("http://d8w8k0c8cw008wccwcg0cw4c.77.37.45.61.sslip.io/dashboard", {
+  const response = await fetch("https://btd3hm1k-5000.asse.devtunnels.ms//dashboard", {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,

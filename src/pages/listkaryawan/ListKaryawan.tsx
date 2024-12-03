@@ -45,7 +45,7 @@ const fetchData = async (page: number): Promise<any> => {
     throw new Error("Token tidak ditemukan. Silakan login kembali.");
   }
 
-  const response = await fetch(`http://d8w8k0c8cw008wccwcg0cw4c.77.37.45.61.sslip.io/karyawan?page=${page}`, {
+  const response = await fetch(`https://btd3hm1k-5000.asse.devtunnels.ms//karyawan?page=${page}`, {
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",

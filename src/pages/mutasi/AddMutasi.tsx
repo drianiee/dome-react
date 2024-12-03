@@ -43,7 +43,7 @@ const fetchKaryawanByPerner = async (perner: string): Promise<Karyawan | null> =
   }
 
   const response = await fetch(
-    `http://d8w8k0c8cw008wccwcg0cw4c.77.37.45.61.sslip.io/mutasi/karyawan/${encodeURIComponent(perner)}`,
+    `https://btd3hm1k-5000.asse.devtunnels.ms//mutasi/karyawan/${encodeURIComponent(perner)}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -68,7 +68,7 @@ const fetchDropdownData = async (): Promise<DropdownData[]> => {
   }
 
   const response = await fetch(
-    `http://d8w8k0c8cw008wccwcg0cw4c.77.37.45.61.sslip.io/unit-dropdown`,
+    `https://btd3hm1k-5000.asse.devtunnels.ms//unit-dropdown`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -141,7 +141,7 @@ const AddMutasi = () => {
     }
 
     const response = await fetch(
-      "http://d8w8k0c8cw008wccwcg0cw4c.77.37.45.61.sslip.io/mutasi",
+      "https://btd3hm1k-5000.asse.devtunnels.ms//mutasi",
       {
         method: "POST",
         headers: {
