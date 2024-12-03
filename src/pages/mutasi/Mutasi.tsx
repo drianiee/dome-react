@@ -47,7 +47,7 @@ const fetchKaryawanData = async (): Promise<Karyawan[]> => {
   if (!token) throw new Error("Token tidak ditemukan. Silakan login kembali.");
 
   const response = await fetch(
-    `https://btd3hm1k-5000.asse.devtunnels.ms//karyawan`,
+    `https://btd3hm1k-5000.asse.devtunnels.ms/karyawan`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -66,7 +66,7 @@ const fetchMutasiData = async (): Promise<Mutasi[]> => {
   if (!token) throw new Error("Token tidak ditemukan. Silakan login kembali.");
 
   const response = await fetch(
-    `https://btd3hm1k-5000.asse.devtunnels.ms//mutasi`,
+    `https://btd3hm1k-5000.asse.devtunnels.ms/mutasi`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -129,7 +129,7 @@ const Mutasi = () => {
   
     try {
       const response = await fetch(
-        `https://btd3hm1k-5000.asse.devtunnels.ms//mutasi/${perner}`,
+        `https://btd3hm1k-5000.asse.devtunnels.ms/mutasi/${perner}`,
         {
           method: "DELETE",
           headers: {

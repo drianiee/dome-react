@@ -56,7 +56,7 @@ const fetchData = async (bulan: string): Promise<Karyawan[]> => {
 
   const formattedBulan = bulan.split("-").reverse().join("-");
   const response = await fetch(
-    `https://btd3hm1k-5000.asse.devtunnels.ms//rating?bulan=${formattedBulan}`,
+    `https://btd3hm1k-5000.asse.devtunnels.ms/rating?bulan=${formattedBulan}`,
     {
       method: "GET",
       headers: {
@@ -158,7 +158,7 @@ const ListKaryawan = () => {
 
     try {
       const response = await fetch(
-        `https://btd3hm1k-5000.asse.devtunnels.ms//rating/${popup.karyawan.perner}`,
+        `https://btd3hm1k-5000.asse.devtunnels.ms/rating/${popup.karyawan.perner}`,
         {
           method: "POST",
           headers: {

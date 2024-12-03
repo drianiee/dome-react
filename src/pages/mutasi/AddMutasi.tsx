@@ -43,7 +43,7 @@ const fetchKaryawanByPerner = async (perner: string): Promise<Karyawan | null> =
   }
 
   const response = await fetch(
-    `https://btd3hm1k-5000.asse.devtunnels.ms//mutasi/karyawan/${encodeURIComponent(perner)}`,
+    `https://btd3hm1k-5000.asse.devtunnels.ms/mutasi/karyawan/${encodeURIComponent(perner)}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -68,7 +68,7 @@ const fetchDropdownData = async (): Promise<DropdownData[]> => {
   }
 
   const response = await fetch(
-    `https://btd3hm1k-5000.asse.devtunnels.ms//unit-dropdown`,
+    `https://btd3hm1k-5000.asse.devtunnels.ms/unit-dropdown`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -141,7 +141,7 @@ const AddMutasi = () => {
     }
 
     const response = await fetch(
-      "https://btd3hm1k-5000.asse.devtunnels.ms//mutasi",
+      "https://btd3hm1k-5000.asse.devtunnels.ms/mutasi",
       {
         method: "POST",
         headers: {
