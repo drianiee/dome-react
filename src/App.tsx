@@ -68,7 +68,7 @@ function App() {
           } 
         />
         <Route
-          path="/mutasi/add-mutasi/:nama" 
+          path="/mutasi/add-mutasi/:perner" 
           element={
             <Layout>
           <AddMutasi />

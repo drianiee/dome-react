@@ -41,6 +41,7 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
   }
 
   const response = await fetch("http://d8w8k0c8cw008wccwcg0cw4c.77.37.45.61.sslip.io/dashboard", {
+    method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",

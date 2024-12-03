@@ -36,6 +36,10 @@ type Karyawan = {
   sub_unit: string;
   posisi_pekerjaan: string;
   sumber_anggaran: string;
+  nik_atasan: number;
+  nama_atasan: string;
+  bergabung_sejak: number;
+  status_karyawan: string;
   skor_rating: string;
 };
 
@@ -49,10 +53,13 @@ const fetchData = async (bulan: string): Promise<Karyawan[]> => {
   if (!token) {
     throw new Error("Token tidak ditemukan. Silakan login kembali.");
   }
+
+
   const formattedBulan = bulan.split("-").reverse().join("-");
   const response = await fetch(
     `http://d8w8k0c8cw008wccwcg0cw4c.77.37.45.61.sslip.io/rating?bulan=${formattedBulan}`,
     {
+      method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -199,6 +206,10 @@ const ListKaryawan = () => {
         style={{ backgroundImage: `url(${ListKaryawanHeader})` }}
       >
         <div className="p-8 text-white">
+          <div className="flex gap-2 mb-4">
+            <p className="text-xl text-[#FF0000]">#</p>
+            <p className="text-xl text-gray-300">Elevating Your Future</p>
+          </div>
           <h1 className="text-6xl font-bold">Penilaian Karyawan</h1>
         </div>
       </div>
@@ -249,6 +260,10 @@ const ListKaryawan = () => {
                 <TableHead className="font-bold w-40">Sub Unit</TableHead>
                 <TableHead className="font-bold w-20">Posisi</TableHead>
                 <TableHead className="font-bold w-20">Sumber Anggaran</TableHead>
+                <TableHead className="font-bold w-20">NIK Atasan</TableHead>
+                <TableHead className="font-bold w-20">Nama Atasan</TableHead>
+                <TableHead className="font-bold w-20">Bergabung Sejak</TableHead>
+                <TableHead className="font-bold w-20">Status Karyawan</TableHead>
                 <TableHead className="font-bold w-12">Skor Rating</TableHead>
                 <TableHead className="font-bold w-12">Aksi</TableHead>
               </TableRow>
@@ -263,6 +278,10 @@ const ListKaryawan = () => {
                     <TableCell className="w-40">{karyawan.sub_unit}</TableCell>
                     <TableCell className="w-20">{karyawan.posisi_pekerjaan}</TableCell>
                     <TableCell className="w-20">{karyawan.sumber_anggaran}</TableCell>
+                    <TableHead className="w-20">{karyawan.nik_atasan}</TableHead>
+                    <TableHead className="w-20">{karyawan.nama_atasan}</TableHead>
+                    <TableHead className="w-20">{karyawan.bergabung_sejak}</TableHead>
+                    <TableHead className="w-20">{karyawan.status_karyawan}</TableHead>
                     <TableCell className="w-12 text-[#1CB993] font-bold">{karyawan.skor_rating}</TableCell>
                     <TableCell className="w-12">
                       <Dialog>
@@ -275,12 +294,13 @@ const ListKaryawan = () => {
                             <Pencil size={20} strokeWidth={1.5} className="text-blue-500" />
                           </button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent aria-describedby="dialog-description">
                           <DialogHeader>
-                            <DialogTitle>
-                              Penilaian untuk {karyawan.nama} ({karyawan.perner})
-                            </DialogTitle>
+                            <DialogTitle>Penilaian untuk {karyawan.nama}</DialogTitle>
                           </DialogHeader>
+                          <p id="dialog-description">
+                            Isi penilaian untuk setiap kategori dengan skor antara 1-5.
+                          </p>
                           <div className="space-y-4">
                             {ratings.map((rating, index) => (
                               <div key={index}>
