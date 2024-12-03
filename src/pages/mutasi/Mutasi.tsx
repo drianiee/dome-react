@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import ListKaryawanHeader from '../../assets/ListKaryawanHeader.png';
+import ListKaryawanHeader from "../../assets/ListKaryawanHeader.png";
+import { Pencil, Trash } from "lucide-react"; // Import ikon Pencil dari Lucide
 import {
   Table,
   TableBody,
@@ -20,7 +21,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 
-// Define type for Karyawan and Mutasi data
 type Karyawan = {
   perner: string;
   nama: string;
@@ -87,7 +87,6 @@ const Mutasi = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -117,9 +116,45 @@ const Mutasi = () => {
     }
   }, [searchQuery, allKaryawan]);
 
+  const deleteMutasi = async (perner: string) => {
+    const token = localStorage.getItem("token");
+  
+    if (!token) {
+      alert("Token tidak ditemukan. Silakan login kembali.");
+      return;
+    }
+  
+    const confirmed = window.confirm("Apakah Anda yakin ingin menghapus mutasi ini?");
+    if (!confirmed) return;
+  
+    try {
+      const response = await fetch(
+        `http://d8w8k0c8cw008wccwcg0cw4c.77.37.45.61.sslip.io/mutasi/${perner}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      // Perbarui data setelah penghapusan
+      setMutasiData((prev) => prev.filter((item) => item.perner !== perner));
+      alert("Mutasi berhasil dihapus.");
+    } catch (err) {
+      console.error("Gagal menghapus mutasi:", err);
+      alert("Gagal menghapus mutasi.");
+    }
+  };
+  
+
   return (
     <div className="p-8">
-      
       <div
         className="bg-cover bg-center rounded-lg mb-8 h-[180px]"
         style={{ backgroundImage: `url(${ListKaryawanHeader})` }}
@@ -134,10 +169,19 @@ const Mutasi = () => {
       </div>
 
       {error && <div className="text-red-500 text-center mb-4">{error}</div>}
-      {/* Tombol dan Dialog Pencarian */}
-      <Button onClick={() => setIsDialogOpen(true)} className="mt-4">
-        Cari Karyawan
-      </Button>
+
+      {/* Pencarian dan Tombol */}
+      <div className="flex justify-between items-center mb-6">
+        <Input
+          placeholder="Cari Karyawan"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-"
+        />
+        <Button onClick={() => setIsDialogOpen(true)} className="ml-4 bg-[#CF3C3C] text-white hover:bg-red-400" >
+          Add Mutasi
+        </Button>
+      </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
@@ -184,7 +228,7 @@ const Mutasi = () => {
           </Table>
         </DialogContent>
       </Dialog>
-      
+
       {/* Tabel Mutasi */}
       <Table>
         <TableCaption>Daftar Mutasi Karyawan</TableCaption>
@@ -198,6 +242,7 @@ const Mutasi = () => {
             <TableHead>Posisi Baru</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Tanggal Dibuat</TableHead>
+            <TableHead>Detail</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -227,6 +272,30 @@ const Mutasi = () => {
                   minute: "2-digit",
                 })}
               </TableCell>
+              <TableCell>
+                <div className="flex gap-2">
+                  {/* Tombol Edit */}
+                  <button
+                    onClick={() =>
+                      navigate(
+                        `/mutasi/detail-mutasi/${encodeURIComponent(mutasi.perner)}`
+                      )
+                    }
+                    className="p-2 border border-[#ACACAC] rounded-md hover:bg-blue-100 transition"
+                  >
+                    <Pencil size={20} strokeWidth={1.5} className="text-blue-500" />
+                  </button>
+
+                  {/* Tombol Delete */}
+                  <button
+                    onClick={() => deleteMutasi(mutasi.perner)}
+                    className="p-2 border border-[#ACACAC] rounded-md hover:bg-red-100 transition"
+                  >
+                    <Trash size={20} strokeWidth={1.5} className="text-red-500" />
+                  </button>
+                </div>
+              </TableCell>
+
             </TableRow>
           ))}
         </TableBody>

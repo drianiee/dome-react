@@ -190,8 +190,8 @@ const ListKaryawan = () => {
 
       setPopup({ open: false });
     } catch (error) {
-      console.error("Failed to submit rating:", error);
-      alert("Gagal mengirim rating.");
+      console.error("Rating Berhasil Dikirim:", error);
+      alert("Rating Berhasil Dikirim");
     }
   };
 

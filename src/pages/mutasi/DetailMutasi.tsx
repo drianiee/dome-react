@@ -1,10 +1,11 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button"; // Import Button component
-import { useNavigate } from "react-router-dom"; // Import useNavigate
-import { Input } from "@/components/ui/input"; // Ensure this import exists
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, CheckCircle, AlertCircle, AlertTriangle, XCircle } from "lucide-react";
 
 type DetailMutasi = {
   status_mutasi: string;
@@ -19,6 +20,7 @@ type DetailMutasi = {
   sub_unit_baru: string;
   posisi_baru: string;
   created_at: string;
+  alasan_penolakan?: string; // Optional untuk alasan penolakan
 };
 
 const fetchMutasiDetail = async (perner: string): Promise<DetailMutasi> => {
@@ -83,14 +85,14 @@ const rejectMutasi = async (perner: string, reason: string, navigate: Function) 
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ alasan_penolakan: reason }) // Send the rejection reason
+      body: JSON.stringify({ alasan_penolakan: reason }), // Kirim alasan penolakan
     }
   );
 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
-  // Redirect to mutasi page after success
+  // Redirect ke halaman mutasi setelah berhasil
   navigate("/mutasi");
 };
 
@@ -98,10 +100,9 @@ const DetailMutasi = () => {
   const { perner } = useParams<{ perner: string }>();
   const [data, setData] = useState<DetailMutasi | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<number | null>(null); // Track user role
+  const navigate = useNavigate();
   const [reason, setReason] = useState<string>(""); // Reason for rejection
   const [isRejecting, setIsRejecting] = useState<boolean>(false); // Track if rejection is being edited
-  const navigate = useNavigate();
 
   useEffect(() => {
     const getData = async () => {
@@ -114,13 +115,7 @@ const DetailMutasi = () => {
       }
     };
 
-    const getUserRole = () => {
-      const role = localStorage.getItem("role"); // Assuming role is saved in localStorage
-      setUserRole(role ? parseInt(role) : null); // Ensure role is parsed as an integer
-    };
-
     getData();
-    getUserRole();
   }, [perner]);
 
   if (error) {
@@ -140,36 +135,129 @@ const DetailMutasi = () => {
     setReason(""); // Clear the reason input
   };
 
+  // Mendefinisikan warna, ikon, dan teks berdasarkan status
+  const getStatusProps = () => {
+    switch (data.status_mutasi.toLowerCase()) {
+      case "diproses":
+        return {
+          badgeColor: "bg-[#F09E1A] text-white font-bold",
+          alertColor: "bg-[#FEFCE8] text-[#854D0E]",
+          icon: <AlertTriangle className="h-5 w-5 !text-[#854D0E] mr-3" />,
+          alertTitle: "Usulan Mutasi Diperiksa",
+          alertDescription: "Harap Menunggu Proses Verifikasi",
+        };
+      case "ditolak":
+        return {
+          badgeColor: "bg-[#F01A1A] text-white font-bold",
+          alertColor: "bg-[#FEF2F2] text-[#991B1B]",
+          icon: <XCircle className="h-5 w-5 !text-[#991B1B] mr-3" />,
+          alertTitle: "Usulan Mutasi Ditolak oleh Atasan",
+          alertDescription: data.alasan_penolakan || "Tidak ada alasan yang diberikan.",
+        };
+      case "disetujui":
+        return {
+          badgeColor: "bg-[#1CB941] text-white",
+          alertColor: "bg-[#F0FDF4] text-[#065F46]",
+          icon: <CheckCircle className="h-5 w-5 !text-[#065F46] mr-3" />,
+          alertTitle: "Usulan Disetujui",
+          alertDescription: "Usulan Mutasi Anda Telah Disetujui oleh Atasan",
+        };
+      default:
+        return {
+          badgeColor: "bg-gray-500 text-white",
+          alertColor: "bg-gray-100 text-gray-700",
+          icon: <AlertCircle className="h-5 w-5 text-gray-700 mr-3" />,
+          alertTitle: "Status Tidak Diketahui",
+          alertDescription: "Status mutasi tidak valid.",
+        };
+    }
+  };
+
+  const { badgeColor, alertColor, icon, alertTitle, alertDescription } = getStatusProps();
+
   return (
-    <div className="p-20">
-      <Card className="max-w-xl mx-auto mb-4">
-        <CardHeader>
-          <CardTitle>Detail Mutasi Karyawan</CardTitle>
-          <div className="flex gap-2">
-            <CardDescription>Perner: {data.perner}</CardDescription>
-            <Badge variant="outline" className="mb-4">
-              {data.status_mutasi}
-            </Badge>
+    <div className="p-10 space-y-6">
+      {/* Back Button */}
+      <div className="flex items-center gap-4 mb-8">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center text-gray-700 hover:text-black transition-all"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          <span className="text-xl font-semibold text-blue-900">Detail Karyawan Mutasi</span>
+        </button>
+      </div>
+
+      {/* Wrapper untuk semua elemen utama dengan border */}
+      <div className="border border-[#E9E9E9] rounded-lg p-6 space-y-8">
+        {/* Header Status */}
+        <div className="space-y-4">
+          <div className="flex gap-4">
+            <h2 className="text-lg font-bold">Status Mutasi</h2>
+            <Badge className={badgeColor}>{data.status_mutasi}</Badge>
           </div>
-        </CardHeader>
-        <CardContent>
-          <p><strong>Nama:</strong> {data.nama}</p>
-          <p><strong>Unit Lama:</strong> {data.unit} ({data.sub_unit})</p>
-          <p><strong>Posisi Lama:</strong> {data.posisi_pekerjaan}</p>
-        </CardContent>
-      </Card>
 
-      <Card className="max-w-xl mx-auto pt-6">
-        <CardContent>
-          <p><strong>Unit Baru:</strong> {data.unit_baru} ({data.sub_unit_baru})</p>
-          <p><strong>Posisi Baru:</strong> {data.posisi_baru}</p>
-          <p><strong>Nama Atasan:</strong> {data.nama_atasan} ({data.nik_atasan})</p>
-          <p><strong>Tanggal Mutasi:</strong> {new Date(data.created_at).toLocaleString("id-ID")}</p>
-        </CardContent>
-      </Card>
+          {/* Alert Status */}
+          <Alert className={`flex items-center ${alertColor}`}>
+            {icon}
+            <AlertDescription>
+              <strong>{alertTitle}</strong>
+              <br />
+              {alertDescription}
+            </AlertDescription>
+          </Alert>
+        </div>
 
-      {/* Show Approve/Reject buttons for superadmin (id_roles = 2) */}
-      {userRole === 2 && (
+        {/* Informasi Tambahan */}
+        <div className="grid grid-cols-2 gap-8">
+          {/* Informasi Pekerjaan Saat Ini */}
+          <div>
+            <h3 className="text-red-500 font-bold mb-4">Informasi Pekerjaan Saat Ini</h3>
+            <div className="space-y-4">
+              <div>
+                <Label className="font-bold">Unit</Label>
+                <p>{data.unit}</p>
+              </div>
+              <div>
+                <Label className="font-bold">Sub Unit</Label>
+                <p>{data.sub_unit}</p>
+              </div>
+              <div>
+                <Label className="font-bold">NIK Atasan</Label>
+                <p>{data.nik_atasan}</p>
+              </div>
+              <div>
+                <Label className="font-bold">Nama Atasan</Label>
+                <p>{data.nama_atasan}</p>
+              </div>
+              <div>
+                <Label className="font-bold">Posisi</Label>
+                <p>{data.posisi_pekerjaan}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Informasi Mutasi */}
+          <div>
+            <h3 className="text-red-500 font-bold mb-4">Mutasi</h3>
+            <div className="space-y-4">
+              <div>
+                <Label>Unit Baru</Label>
+                <Input value={data.unit_baru} disabled />
+              </div>
+              <div>
+                <Label>Sub Unit Baru</Label>
+                <Input value={data.sub_unit_baru} disabled />
+              </div>
+              <div>
+                <Label>Posisi Baru</Label>
+                <Input value={data.posisi_baru} disabled />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Approve dan Reject */}
         <div className="flex gap-4 justify-center mt-6">
           <Button
             onClick={() => approveMutasi(data.perner, navigate)}
@@ -184,34 +272,34 @@ const DetailMutasi = () => {
             Reject
           </Button>
         </div>
-      )}
 
-      {/* Display rejection form if rejecting */}
-      {isRejecting && (
-        <div className="mt-6">
-          <Input
-            type="text"
-            placeholder="Enter rejection reason"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            className="mb-4"
-          />
-          <div className="flex gap-4 justify-center">
-            <Button
-              onClick={() => rejectMutasi(data.perner, reason, navigate)}
-              className="bg-red-500 hover:bg-red-600"
-            >
-              Confirm Reject
-            </Button>
-            <Button
-              onClick={handleCancel}
-              className="bg-gray-500 hover:bg-gray-600"
-            >
-              Cancel
-            </Button>
+        {/* Konfirmasi Penolakan */}
+        {isRejecting && (
+          <div className="mt-6">
+            <Input
+              type="text"
+              placeholder="Enter rejection reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="mb-4"
+            />
+            <div className="flex gap-4 justify-center">
+              <Button
+                onClick={() => rejectMutasi(data.perner, reason, navigate)}
+                className="bg-red-500 hover:bg-red-600"
+              >
+                Confirm Reject
+              </Button>
+              <Button
+                onClick={handleCancel}
+                className="bg-gray-500 hover:bg-gray-600"
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

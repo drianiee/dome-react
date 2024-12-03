@@ -70,8 +70,17 @@ function App() {
         <Route
           path="/mutasi/add-mutasi/:perner" 
           element={
-            <Layout>
-          <AddMutasi />
+          <Layout>
+            <AddMutasi />
+          </Layout>
+          } 
+        />
+
+        <Route
+          path="/mutasi/detail-mutasi/:perner" 
+          element={
+          <Layout>
+            <DetailMutasi />
           </Layout>
           } 
         />
