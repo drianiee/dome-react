@@ -50,7 +50,7 @@ const fetchDetail = async (perner: string): Promise<any> => {
     throw new Error("Token tidak ditemukan. Silakan login kembali.");
   }
 
-  const response = await fetch(`https://btd3hm1k-5000.asse.devtunnels.ms/karyawan/${perner}`, {
+  const response = await fetch(`https://dome-backend-5uxq.onrender.com/karyawan/${perner}`, {
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",

@@ -31,7 +31,7 @@ const fetchMutasiDetail = async (perner: string): Promise<DetailMutasi> => {
   }
 
   const response = await fetch(
-    `https://btd3hm1k-5000.asse.devtunnels.ms/mutasi/${perner}`,
+    `https://dome-backend-5uxq.onrender.com/mutasi/${perner}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -54,7 +54,7 @@ const approveMutasi = async (perner: string, navigate: Function) => {
   }
 
   const response = await fetch(
-    `https://btd3hm1k-5000.asse.devtunnels.ms/mutasi/${perner}/persetujuan`,
+    `https://dome-backend-5uxq.onrender.com/mutasi/${perner}/persetujuan`,
     {
       method: "POST",
       headers: {
@@ -78,7 +78,7 @@ const rejectMutasi = async (perner: string, reason: string, navigate: Function) 
   }
 
   const response = await fetch(
-    `https://btd3hm1k-5000.asse.devtunnels.ms/mutasi/${perner}/penolakan`,
+    `https://dome-backend-5uxq.onrender.com/mutasi/${perner}/penolakan`,
     {
       method: "POST",
       headers: {

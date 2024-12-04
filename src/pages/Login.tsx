@@ -16,7 +16,7 @@ const Login = () => {
     const password = formData.get("password")?.toString() || "";
 
     try {
-      const response = await fetch("https://btd3hm1k-5000.asse.devtunnels.ms/login", {
+      const response = await fetch("https://dome-backend-5uxq.onrender.com/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

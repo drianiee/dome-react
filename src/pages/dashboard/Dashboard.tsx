@@ -40,7 +40,7 @@ const fetchDashboardData = async (): Promise<DashboardData> => {
     throw new Error("Token tidak ditemukan. Silakan login kembali.");
   }
 
-  const response = await fetch("https://btd3hm1k-5000.asse.devtunnels.ms/dashboard", {
+  const response = await fetch("https://dome-backend-5uxq.onrender.com/dashboard", {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
