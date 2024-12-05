@@ -114,6 +114,7 @@ const DetailMutasi = () => {
         console.error("Kesalahan jaringan:", error);
         alert("Kesalahan jaringan. Periksa koneksi Anda.");
       }
+      navigate("/mutasi");
   };
 
   useEffect(() => {
