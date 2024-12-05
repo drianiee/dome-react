@@ -52,7 +52,7 @@ function App() {
           }
         />
         <Route
-          path="/karyawan/:perner"
+          path="/list-karyawan/:perner"
           element={
             <Layout>
               <DetailKaryawan />

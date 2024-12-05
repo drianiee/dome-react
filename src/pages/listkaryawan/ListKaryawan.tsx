@@ -111,7 +111,7 @@ const ListKaryawan = () => {
   };
 
   const handleDetailClick = (perner: string) => {
-    navigate(`/karyawan/${perner}`); // Navigasi ke halaman detail
+    navigate(`/list-karyawan/${perner}`); // Navigasi ke halaman detail
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {

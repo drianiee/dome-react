@@ -6,7 +6,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="flex-grow">
+      <main className="ml-64 flex-grow">
       {/* <SidebarTrigger /> */}
         {children}
       </main>

@@ -256,12 +256,15 @@ const Mutasi = () => {
               <TableCell>{mutasi.posisi_baru}</TableCell>
               <TableCell>
                 <Badge
-                  variant={
-                    mutasi.status_mutasi === "Diproses" ? "outline" : "default"
-                  }
+                  className={`
+                    ${mutasi.status_mutasi === "Disetujui" ? "bg-[#1CB941] text-white hover:bg-[#1CB941]" : ""}
+                    ${mutasi.status_mutasi === "Ditolak" ? "bg-[#F01A1A] text-white hover:bg-[#F01A1A]" : ""}
+                    ${mutasi.status_mutasi === "Diproses" ? "bg-gray-100 text-gray-700" : ""}
+                  `}
                 >
                   {mutasi.status_mutasi}
                 </Badge>
+
               </TableCell>
               <TableCell>
                 {new Date(mutasi.created_at).toLocaleDateString("id-ID", {

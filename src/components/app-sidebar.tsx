@@ -16,8 +16,10 @@ export function AppSidebar() {
     navigate("/");
   };
 
+  const isActive = (basePath: string) => location.pathname.startsWith(basePath);
+
   return (
-    <div className="top-0 left-0 h-screen w-64 bg-white shadow-md flex flex-col z-50">
+    <div className="fixed top-0 left-0 h-screen w-64 bg-white shadow-md flex flex-col z-50">
       {/* Logo Section */}
       <div className="flex items-center justify-center py-6">
         <img
@@ -35,7 +37,7 @@ export function AppSidebar() {
           <Link
             to="/dashboard"
             className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium ${
-              location.pathname === "/dashboard" ? "bg-[#CF3C3C] text-white" : "text-gray-500"
+              isActive("/dashboard") ? "bg-[#CF3C3C] text-white" : "text-gray-500"
             }`}
           >
             <Home className="w-5 h-5 mr-3" />
@@ -46,7 +48,7 @@ export function AppSidebar() {
           <Link
             to="/list-karyawan"
             className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium ${
-              location.pathname === "/list-karyawan" ? "bg-[#CF3C3C] text-white" : "text-gray-500"
+              isActive("/list-karyawan") ? "bg-[#CF3C3C] text-white" : "text-gray-500"
             }`}
           >
             <List className="w-5 h-5 mr-3" />
@@ -57,7 +59,7 @@ export function AppSidebar() {
           <Link
             to="/mutasi"
             className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium ${
-              location.pathname === "/mutasi" ? "bg-[#CF3C3C] text-white" : "text-gray-500"
+              isActive("/mutasi") ? "bg-[#CF3C3C] text-white" : "text-gray-500"
             }`}
           >
             <Inbox className="w-5 h-5 mr-3" />
@@ -68,7 +70,7 @@ export function AppSidebar() {
           <Link
             to="/penilaian"
             className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium ${
-              location.pathname === "/penilaian" ? "bg-[#CF3C3C] text-white" : "text-gray-500"
+              isActive("/penilaian") ? "bg-[#CF3C3C] text-white" : "text-gray-500"
             }`}
           >
             <User className="w-5 h-5 mr-3" />

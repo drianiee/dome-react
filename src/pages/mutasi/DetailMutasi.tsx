@@ -20,7 +20,7 @@ type DetailMutasi = {
   sub_unit_baru: string;
   posisi_baru: string;
   created_at: string;
-  alasan_penolakan?: string; // Optional untuk alasan penolakan
+  alasan_penolakan?: string;
 };
 
 const fetchMutasiDetail = async (perner: string): Promise<DetailMutasi> => {
@@ -71,31 +71,6 @@ const approveMutasi = async (perner: string, navigate: Function) => {
   navigate("/mutasi");
 };
 
-const rejectMutasi = async (perner: string, reason: string, navigate: Function) => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    throw new Error("Token tidak ditemukan.");
-  }
-
-  const response = await fetch(
-    `https://dome-backend-5uxq.onrender.com/mutasi/${perner}/penolakan`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ alasan_penolakan: reason }), // Kirim alasan penolakan
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  // Redirect ke halaman mutasi setelah berhasil
-  navigate("/mutasi");
-};
-
 const DetailMutasi = () => {
   const { perner } = useParams<{ perner: string }>();
   const [data, setData] = useState<DetailMutasi | null>(null);
@@ -103,6 +78,43 @@ const DetailMutasi = () => {
   const navigate = useNavigate();
   const [reason, setReason] = useState<string>(""); // Reason for rejection
   const [isRejecting, setIsRejecting] = useState<boolean>(false); // Track if rejection is being edited
+
+  const rejectMutasi = async (perner: string, reason: string, navigate: Function) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Token tidak ditemukan. Silakan login kembali.");
+      return;
+    }
+  
+    try {
+      const response = await fetch(
+        `https://dome-backend-5uxq.onrender.com/mutasi/${perner}/penolakan`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ alasan_penolakan: reason }),
+        }
+      );
+  
+      if (!response.ok) {
+        const errorData = await response.json(); // Tangkap pesan error dari server
+        console.error("Respons error dari server:", errorData);
+        alert(`Error: ${errorData.message || "Gagal melakukan penolakan."}`);
+        return;
+      }
+    // Perbarui data jika berhasil
+      setData((prevData) =>
+        prevData ? { ...prevData, status_mutasi: "Ditolak", alasan_penolakan: reason } : null
+      );
+      setIsRejecting(false); // Tutup form penolakan
+      } catch (error) {
+        console.error("Kesalahan jaringan:", error);
+        alert("Kesalahan jaringan. Periksa koneksi Anda.");
+      }
+  };
 
   useEffect(() => {
     const getData = async () => {
@@ -203,7 +215,7 @@ const DetailMutasi = () => {
             <AlertDescription>
               <strong>{alertTitle}</strong>
               <br />
-              {alertDescription}
+              {data.status_mutasi === "Ditolak" ? data.alasan_penolakan : alertDescription}
             </AlertDescription>
           </Alert>
         </div>
