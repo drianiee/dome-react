@@ -178,9 +178,11 @@ const Mutasi = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-"
         />
-        <Button onClick={() => setIsDialogOpen(true)} className="ml-4 bg-[#CF3C3C] text-white hover:bg-red-400" >
-          Add Mutasi
-        </Button>
+        {parseInt(localStorage.getItem("role") || "0", 10) === 2 && (
+          <Button onClick={() => setIsDialogOpen(true)} className="ml-4 bg-[#CF3C3C] text-white hover:bg-red-400" >
+            Add Mutasi
+          </Button>
+        )}
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -290,12 +292,14 @@ const Mutasi = () => {
                   </button>
 
                   {/* Tombol Delete */}
-                  <button
-                    onClick={() => deleteMutasi(mutasi.perner)}
-                    className="p-2 border border-[#ACACAC] rounded-md hover:bg-red-100 transition"
-                  >
-                    <Trash size={20} strokeWidth={1.5} className="text-red-500" />
-                  </button>
+                  {parseInt(localStorage.getItem("role") || "0", 10) === 2 && (
+                    <button
+                      onClick={() => deleteMutasi(mutasi.perner)}
+                      className="p-2 border border-[#ACACAC] rounded-md hover:bg-red-100 transition"
+                    >
+                      <Trash size={20} strokeWidth={1.5} className="text-red-500" />
+                    </button>
+                  )}
                 </div>
               </TableCell>
 

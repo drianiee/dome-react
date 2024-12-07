@@ -271,6 +271,7 @@ const DetailMutasi = () => {
         </div>
 
         {/* Approve dan Reject */}
+        {parseInt(localStorage.getItem("role") || "0", 10) === 4 && (
         <div className="flex gap-4 justify-center mt-6">
           <Button
             onClick={() => approveMutasi(data.perner, navigate)}
@@ -285,6 +286,7 @@ const DetailMutasi = () => {
             Reject
           </Button>
         </div>
+        )}
 
         {/* Konfirmasi Penolakan */}
         {isRejecting && (

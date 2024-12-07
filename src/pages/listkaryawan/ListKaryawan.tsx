@@ -170,23 +170,26 @@ const ListKaryawan = () => {
             </div>
 
             {/* Filter by Unit */}
-            <div className="w-1/5">
-              <Select onValueChange={setFilterUnit}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Unit" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">Semua Unit</SelectItem>
-                  {Array.from(new Set(data.map((karyawan) => karyawan.unit)))
-                    .filter((unit) => unit) // Hapus nilai undefined atau kosong
-                    .map((unit, index) => (
-                      <SelectItem key={index} value={unit}>
-                        {unit}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {[1, 2].includes(parseInt(localStorage.getItem("role") || "0", 10)) && (
+              <div className="w-1/5">
+                <Select onValueChange={setFilterUnit}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Unit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">Semua Unit</SelectItem>
+                    {Array.from(new Set(data.map((karyawan) => karyawan.unit)))
+                      .filter((unit) => unit) // Hapus nilai undefined atau kosong
+                      .map((unit, index) => (
+                        <SelectItem key={index} value={unit}>
+                          {unit}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
           </div>
 
           {/* Table Section */}

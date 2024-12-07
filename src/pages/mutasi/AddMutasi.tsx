@@ -95,6 +95,7 @@ const AddMutasi = () => {
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const role = parseInt(localStorage.getItem("role") || "0", 10);
 
   useEffect(() => {
     const getKaryawanData = async () => {
@@ -172,8 +173,11 @@ const AddMutasi = () => {
   };
 
   const selectedUnit = dropdownData.find((item) => item.unit_baru === unitBaru);
-
+  if (role !== 2) {
+    return <div>Anda tidak memiliki akses ke halaman ini.</div>;
+  }
   return (
+
     <div className="p-8 bg-gray-50 min-h-screen">
       {error && <div className="text-red-500 text-center">{error}</div>}
       {/* Header */}
