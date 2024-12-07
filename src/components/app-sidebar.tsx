@@ -20,11 +20,11 @@ export function AppSidebar() {
   return (
     <div className="fixed top-0 left-0 h-screen w-64 bg-white shadow-md flex flex-col z-50">
       {/* Logo Section */}
-      <div className="flex items-center justify-center py-6">
+      <div className="flex items-center px-8 py-6">
         <img
           src={LogoTelkom}
           alt="Logo Telkom"
-          className="h-12"
+          className="h-8"
         />
         <h1 className="ml-2 text-xl font-bold text-black">Dome</h1>
       </div>
