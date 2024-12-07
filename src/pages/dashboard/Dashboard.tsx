@@ -124,7 +124,7 @@ const Dashboard = () => {
             <p className="text-xl text-[#FF0000]">#</p>
             <p className="text-xl text-gray-300">Elevating Your Future</p>
           </div>
-          <h1 className="text-6xl font-bold">List Karyawan</h1>
+          <h1 className="text-6xl font-bold">Dashboard</h1>
         </div>
       </div>
 
