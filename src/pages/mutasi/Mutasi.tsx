@@ -12,12 +12,8 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 
@@ -116,41 +112,38 @@ const Mutasi = () => {
     }
   }, [searchQuery, allKaryawan]);
 
-  const deleteMutasi = async (perner: string) => {
-    const token = localStorage.getItem("token");
-  
-    if (!token) {
-      alert("Token tidak ditemukan. Silakan login kembali.");
-      return;
-    }
-  
-    const confirmed = window.confirm("Apakah Anda yakin ingin menghapus mutasi ini?");
-    if (!confirmed) return;
-  
-    try {
-      const response = await fetch(
-        `https://dome-backend-5uxq.onrender.com/mutasi/${perner}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-  
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+    const deleteMutasi = async (perner: string) => {
+      const token = localStorage.getItem("token");
+    
+      if (!token) {
+        alert("Token tidak ditemukan. Silakan login kembali.");
+        return;
       }
+    
+      try {
+        const response = await fetch(
+          `https://dome-backend-5uxq.onrender.com/mutasi/${perner}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+    
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    
+        setMutasiData((prev) => prev.filter((item) => item.perner !== perner));
+      } catch (err) {
+        console.error("Gagal menghapus mutasi:", err);
+        alert("Gagal menghapus mutasi.");
+      }
+    };
+    
   
-      // Perbarui data setelah penghapusan
-      setMutasiData((prev) => prev.filter((item) => item.perner !== perner));
-      alert("Mutasi berhasil dihapus.");
-    } catch (err) {
-      console.error("Gagal menghapus mutasi:", err);
-      alert("Gagal menghapus mutasi.");
-    }
-  };
   
 
   return (
@@ -278,29 +271,49 @@ const Mutasi = () => {
                 })}
               </TableCell>
               <TableCell>
-                <div className="flex gap-2">
-                  {/* Tombol Edit */}
-                  <button
-                    onClick={() =>
-                      navigate(
-                        `/mutasi/detail-mutasi/${encodeURIComponent(mutasi.perner)}`
-                      )
-                    }
-                    className="p-2 border border-[#ACACAC] rounded-md hover:bg-blue-100 transition"
-                  >
-                    <Pencil size={20} strokeWidth={1.5} className="text-blue-500" />
-                  </button>
+              <div className="flex gap-2">
+                {/* Tombol Edit */}
+                <button
+                  onClick={() =>
+                    navigate(
+                      `/mutasi/detail-mutasi/${encodeURIComponent(mutasi.perner)}`
+                    )
+                  }
+                  className="p-2 border border-[#ACACAC] rounded-md hover:bg-blue-100 transition"
+                >
+                  <Pencil size={20} strokeWidth={1.5} className="text-blue-500" />
+                </button>
 
-                  {/* Tombol Delete */}
-                  {parseInt(localStorage.getItem("role") || "0", 10) === 2 && (
-                    <button
-                      onClick={() => deleteMutasi(mutasi.perner)}
-                      className="p-2 border border-[#ACACAC] rounded-md hover:bg-red-100 transition"
-                    >
-                      <Trash size={20} strokeWidth={1.5} className="text-red-500" />
-                    </button>
-                  )}
-                </div>
+                {/* Tombol Delete */}
+                {parseInt(localStorage.getItem("role") || "0", 10) === 2 && (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <button
+                        className="p-2 border border-[#ACACAC] rounded-md hover:bg-red-100 transition"
+                      >
+                        <Trash size={20} strokeWidth={1.5} className="text-red-500" />
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Konfirmasi Hapus Mutasi</DialogTitle>
+                        <DialogDescription>
+                          Apakah Anda yakin ingin menghapus mutasi ini? Tindakan ini tidak dapat dibatalkan.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <Button variant="outline">Batal</Button>
+                        <Button
+                          variant="destructive"
+                          onClick={() => deleteMutasi(mutasi.perner)}
+                        >
+                          Hapus
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
               </TableCell>
 
             </TableRow>
