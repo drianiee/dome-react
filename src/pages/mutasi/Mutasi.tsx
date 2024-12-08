@@ -92,10 +92,12 @@ const Mutasi = () => {
   const [mutasiData, setMutasiData] = useState<Mutasi[]>([]);
   const [allKaryawan, setAllKaryawan] = useState<Karyawan[]>([]);
   const [filteredKaryawan, setFilteredKaryawan] = useState<Karyawan[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchKaryawan, setSearchKaryawan] = useState(""); 
+  const [searchMutasi, setSearchMutasi] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -114,16 +116,19 @@ const Mutasi = () => {
   }, []);
 
   useEffect(() => {
-    if (!searchQuery) {
-      setFilteredKaryawan([]);
-    } else {
-      setFilteredKaryawan(
-        allKaryawan.filter((karyawan) =>
-          karyawan.nama.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+    if (searchKaryawan) {
+      const filtered = allKaryawan.filter((karyawan) =>
+        karyawan.nama.toLowerCase().includes(searchKaryawan.toLowerCase())
       );
+      setFilteredKaryawan(filtered.slice(0, 5)); // Ambil hanya 5 data teratas
+    } else {
+      setFilteredKaryawan([]);
     }
-  }, [searchQuery, allKaryawan]);
+  }, [searchKaryawan, allKaryawan]);
+
+  const filteredData = mutasiData.filter((item) =>
+    item.nama.toLowerCase().includes(searchMutasi.toLowerCase())
+  );
 
     const deleteMutasi = async (perner: string) => {
       const token = localStorage.getItem("token");
@@ -155,9 +160,6 @@ const Mutasi = () => {
         alert("Gagal menghapus mutasi.");
       }
     };
-    
-  
-  
 
   return (
     <div className="p-8">
@@ -179,10 +181,10 @@ const Mutasi = () => {
       {/* Pencarian dan Tombol */}
       <div className="flex justify-between items-center mb-6">
         <Input
-          placeholder="Cari Karyawan"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-"
+          type="text"
+          placeholder="Cari Mutasi"
+          value={searchMutasi}
+          onChange={(e) => setSearchMutasi(e.target.value)}
         />
         {parseInt(localStorage.getItem("role") || "0", 10) === 2 && (
           <Button onClick={() => setIsDialogOpen(true)} className="ml-4 bg-[#CF3C3C] text-white hover:bg-red-400" >
@@ -198,8 +200,8 @@ const Mutasi = () => {
           </DialogHeader>
           <Input
             placeholder="Ketik nama karyawan"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={searchKaryawan}
+            onChange={(e) => setSearchKaryawan(e.target.value)}
             className="mb-4"
           />
           <Table>
@@ -254,7 +256,7 @@ const Mutasi = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {mutasiData.map((mutasi) => (
+          {filteredData.map((mutasi) => (
             <TableRow key={mutasi.id}>
               <TableCell>{mutasi.id}</TableCell>
               <TableCell>{mutasi.perner}</TableCell>
