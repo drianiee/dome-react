@@ -40,21 +40,34 @@ type Mutasi = {
 
 const fetchKaryawanData = async (): Promise<Karyawan[]> => {
   const token = localStorage.getItem("token");
-  if (!token) throw new Error("Token tidak ditemukan. Silakan login kembali.");
+  if (!token) {
+    throw new Error("Token tidak ditemukan. Silakan login kembali.");
+  }
 
-  const response = await fetch(
-    `https://dome-backend-5uxq.onrender.com/karyawan`,
-    {
+  const baseUrl = `https://dome-backend-5uxq.onrender.com/karyawan`;
+  let allData: Karyawan[] = [];
+  let currentPage = 1;
+  let totalPages = 1;
+
+  do {
+    const response = await fetch(`${baseUrl}?page=${currentPage}`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-    }
-  );
+    });
 
-  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-  const data = await response.json();
-  return data.data;
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    allData = [...allData, ...result.data];
+    totalPages = result.totalPages;
+    currentPage++;
+  } while (currentPage <= totalPages);
+
+  return allData;
 };
 
 const fetchMutasiData = async (): Promise<Mutasi[]> => {
