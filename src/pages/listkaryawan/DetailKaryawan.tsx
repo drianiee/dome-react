@@ -206,7 +206,7 @@ const DetailKaryawan = () => {
             <Button
               variant="outline"
               size="sm"
-              className="ml-2 p-1"
+              className="ml-2"
               onClick={handleCopyPerner}
             >
               <Clipboard className="w-4 h-4 text-gray-600" />
@@ -266,28 +266,40 @@ const DetailKaryawan = () => {
                         />
                       </div>
                     )}
-                    <div>
-                      <p className="text-sm text-[#ABABAB]">Jenis Kelamin</p>
-                      {isEditing ? (
-                        <Input
-                          value={formData.jenis_kelamin || ""}
-                          onChange={(e) => setFormData({ ...formData, jenis_kelamin: e.target.value })}
-                        />
-                      ) : (
-                        <p className="text-base font-semibold">{data.jenis_kelamin}</p>
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-sm text-[#ABABAB]">Status</p>
-                      {isEditing ? (
-                        <Input
-                          value={formData.status_pernikahan || ""}
-                          onChange={(e) => setFormData({ ...formData, status_pernikahan: e.target.value })}
-                        />
-                      ) : (
-                        <p className="text-base font-semibold">{data.status_pernikahan}</p>
-                      )}
-                    </div>
+                  <div>
+                    <p className="text-sm text-[#ABABAB]">Jenis Kelamin</p>
+                    {isEditing ? (
+                      <select
+                        value={formData.jenis_kelamin || ""}
+                        onChange={(e) => setFormData({ ...formData, jenis_kelamin: e.target.value })}
+                        className="w-full border border-gray-300 rounded-md p-2 text-base"
+                      >
+                        <option value="">Pilih Jenis Kelamin</option>
+                        <option value="Laki-Laki">Laki-Laki</option>
+                        <option value="Perempuan">Perempuan</option>
+                      </select>
+                    ) : (
+                      <p className="text-base font-semibold">{data.jenis_kelamin}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-[#ABABAB]">Status</p>
+                    {isEditing ? (
+                      <select
+                        value={formData.status_pernikahan || ""}
+                        onChange={(e) => setFormData({ ...formData, status_pernikahan: e.target.value })}
+                        className="w-full border border-gray-300 rounded-md p-2 text-base"
+                      >
+                        <option value="">Pilih Status Pernikahan</option>
+                        <option value="Belum Menikah">Belum Menikah</option>
+                        <option value="Menikah">Menikah</option>
+                      </select>
+                    ) : (
+                      <p className="text-base font-semibold">{data.status_pernikahan}</p>
+                    )}
+                  </div>
+
                     <div>
                       <p className="text-sm text-[#ABABAB]">Jumlah Anak</p>
                       {isEditing ? (
