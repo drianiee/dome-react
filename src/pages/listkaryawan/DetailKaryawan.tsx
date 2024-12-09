@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Clipboard } from "lucide-react";
+import { ArrowLeft, Clipboard, Pencil } from "lucide-react";
 // import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -114,7 +114,6 @@ const DetailKaryawan = () => {
   const handleCopyPerner = () => {
     if (data) {
       navigator.clipboard.writeText(data.perner);
-      alert("Perner copied to clipboard!");
     }
   };
 
@@ -144,7 +143,7 @@ const DetailKaryawan = () => {
   const handleSave = async () => {
     try {
       await updateKaryawan(perner!, formData);
-      alert("Data berhasil diperbarui!");
+      // alert("Data berhasil diperbarui!");
       setIsEditing(false);
       setData({ ...data, ...formData } as DetailKaryawan);
     } catch (err) {
@@ -187,13 +186,13 @@ const DetailKaryawan = () => {
           <ArrowLeft className="w-5 h-5 mr-2" />
           <span className="text-xl font-semibold text-blue-900">Detail Karyawan</span>
         </button>
-        <Button variant="outline" size="sm" onClick={() => setIsEditing(!isEditing)}>
+        {/* <Button variant="outline" size="sm" onClick={() => setIsEditing(!isEditing)}>
           {isEditing ? "Cancel" : "Edit"}
-        </Button>
+        </Button> */}
       </div>
 
       {/* Main Info Section */}
-      <div className="flex items-center justify-normal mb-4">
+      <div className="flex items-end mb-4 justify-between">
         <div>
           <div className="flex gap-4">
             <h1 className="text-3xl font-bold text-black">{data.nama}</h1>
@@ -214,6 +213,26 @@ const DetailKaryawan = () => {
             </Button>
           </div>
         </div>
+        <div className="flex">
+        <Button
+          variant="outline"
+          className={`flex items-center gap-2 px-4 py-2 text-lg ${
+            isEditing
+              ? "" // Warna biru untuk "Cancel"
+              : "bg-red-100 text-red-500 hover:bg-[#CF3C3C] hover:text-white" // Warna merah untuk "Edit"
+          }`}
+          onClick={() => setIsEditing(!isEditing)}
+        >
+          {!isEditing && <Pencil className="w-5 h-5" />} {/* Tambahkan ikon jika tidak sedang mengedit */}
+          {isEditing ? "Cancel" : "Edit Data"}
+        </Button>
+          {isEditing && (
+          <Button className="ml-4 px-4 py-2 text-lg bg-red-100 text-red-500 hover:bg-[#CF3C3C] hover:text-white" onClick={handleSave}>
+            Save
+          </Button>
+        )}
+        </div>
+
       </div>
 
       {/* Detail Section */}
@@ -228,7 +247,25 @@ const DetailKaryawan = () => {
                 {/* Informasi Personal */}
                 <div>
                   <h3 className="text-md font-bold text-red-500 mb-4">Informasi Personal</h3>
-                  <div className="space-y-3">
+                  <div className="space-y-4">
+                    {isEditing && (
+                      <div>
+                        <p className="text-sm text-[#ABABAB]">Nama</p>
+                        <Input
+                          value={formData.nama || ""}
+                          onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
+                        />
+                      </div>
+                    )}
+                    {isEditing && (
+                      <div>
+                        <p className="text-sm text-[#ABABAB]">Posisi</p>
+                        <Input
+                          value={formData.kategori_posisi || ""}
+                          onChange={(e) => setFormData({ ...formData, kategori_posisi: e.target.value })}
+                        />
+                      </div>
+                    )}
                     <div>
                       <p className="text-sm text-[#ABABAB]">Jenis Kelamin</p>
                       {isEditing ? (
