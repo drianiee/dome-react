@@ -60,6 +60,42 @@ const fetchData = async (page: number): Promise<any> => {
   return response.json();
 };
 
+const fetchAllData = async (): Promise<Karyawan[]> => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    throw new Error("Token tidak ditemukan. Silakan login kembali.");
+  }
+
+  let allData: Karyawan[] = [];
+  let currentPage = 1;
+  let totalPages = 1;
+
+  do {
+    const response = await fetch(
+      `https://dome-backend-5uxq.onrender.com/karyawan?page=${currentPage}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    allData = [...allData, ...result.data];
+    totalPages = result.totalPages;
+    currentPage++;
+  } while (currentPage <= totalPages);
+
+  return allData;
+};
+
 const ListKaryawan = () => {
   const [data, setData] = useState<Karyawan[]>([]); // Data asli
   const [search, setSearch] = useState<string>(""); // State untuk pencarian
@@ -72,39 +108,51 @@ const ListKaryawan = () => {
 
   // Filter data di sini (variabel lokal, bukan state)
   const filteredData = data
-    .filter((karyawan) =>
-      karyawan.nama.toLowerCase().includes(search.toLowerCase())
-    )
-    .filter((karyawan) =>
-      filterSumberAnggaran ? karyawan.sumber_anggaran === filterSumberAnggaran : true
-    )
-    .filter((karyawan) => (filterUnit ? karyawan.unit === filterUnit : true));
+  .filter((karyawan) =>
+    karyawan.nama.toLowerCase().includes(search.toLowerCase())
+  )
+  .filter((karyawan) =>
+    filterSumberAnggaran ? karyawan.sumber_anggaran === filterSumberAnggaran : true
+  )
+  .filter((karyawan) => (filterUnit ? karyawan.unit === filterUnit : true));
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const response = await fetchData(currentPage);
-        setData(response.data || []); // Set data asli
-        setCurrentPage(response.currentPage || 1);
-        setTotalPages(response.totalPages || 1);
-        setError(null);
-      } catch (err: any) {
-        console.error("Failed to fetch data:", err.message);
-
-        if (err.message.includes("401") || err.message.includes("403")) {
-          setError("Otorisasi gagal. Silakan login kembali.");
-          localStorage.removeItem("token"); // Hapus token yang salah
-          window.location.href = "/"; // Redirect ke halaman login
-        } else {
-          setError("Gagal mengambil data. Periksa koneksi Anda.");
+    useEffect(() => {
+      const getData = async () => {
+        try {
+          if (search.trim()) {
+            // Pencarian global
+            const allData = await fetchAllData();
+            const filteredData = allData.filter((karyawan) =>
+              karyawan.nama.toLowerCase().includes(search.toLowerCase())
+            );
+            setData(filteredData);
+            setTotalPages(1); // Tidak ada paginasi untuk hasil pencarian
+          } else {
+            // Ambil data berdasarkan halaman
+            const response = await fetchData(currentPage);
+            setData(response.data || []);
+            setCurrentPage(response.currentPage || 1);
+            setTotalPages(response.totalPages || 1);
+          }
+          setError(null);
+        } catch (err: any) {
+          console.error("Failed to fetch data:", err.message);
+    
+          if (err.message.includes("401") || err.message.includes("403")) {
+            setError("Otorisasi gagal. Silakan login kembali.");
+            localStorage.removeItem("token");
+            window.location.href = "/";
+          } else {
+            setError("Gagal mengambil data. Periksa koneksi Anda.");
+          }
+    
+          setData([]);
         }
-
-        setData([]); // Kosongkan data jika gagal
-      }
-    };
-
-    getData();
-  }, [currentPage]);
+      };
+    
+      getData();
+    }, [currentPage, search]);
+    
 
   const handlePageChange = (page: number): void => {
     setCurrentPage(page);
@@ -243,45 +291,47 @@ const ListKaryawan = () => {
             </TableBody>
           </Table>
 
-          {/* Pagination */}
-          <Pagination className="mt-4">
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (currentPage > 1) handlePageChange(currentPage - 1);
-                  }}
-                  aria-disabled={currentPage === 1}
-                />
-              </PaginationItem>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    href="#"
-                    isActive={page === currentPage}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handlePageChange(page);
-                    }}
-                  >
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (currentPage < totalPages) handlePageChange(currentPage + 1);
-                  }}
-                  aria-disabled={currentPage === totalPages}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+          {!search && (
+  <Pagination className="mt-4">
+    <PaginationContent>
+      <PaginationItem>
+        <PaginationPrevious
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            if (currentPage > 1) handlePageChange(currentPage - 1);
+          }}
+          aria-disabled={currentPage === 1}
+        />
+      </PaginationItem>
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+        <PaginationItem key={page}>
+          <PaginationLink
+            href="#"
+            isActive={page === currentPage}
+            onClick={(e) => {
+              e.preventDefault();
+              handlePageChange(page);
+            }}
+          >
+            {page}
+          </PaginationLink>
+        </PaginationItem>
+      ))}
+      <PaginationItem>
+        <PaginationNext
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            if (currentPage < totalPages) handlePageChange(currentPage + 1);
+          }}
+          aria-disabled={currentPage === totalPages}
+        />
+      </PaginationItem>
+    </PaginationContent>
+  </Pagination>
+)}
+
         </>
       )}
     </div>

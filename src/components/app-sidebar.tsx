@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Inbox, LogOut, List } from "lucide-react";
+import { Home, Inbox, LogOut, User, List } from "lucide-react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import LogoTelkom from "../assets/LogoTelkom.png";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -195,6 +195,17 @@ export function AppSidebar() {
             <Inbox className="w-5 h-5 mr-3" />
             Mutasi
           </Link>
+          {parseInt(localStorage.getItem("role") || "0", 10) === 2 && (
+            <Link
+              to="/penilaian"
+              className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium ${
+                isActive("/penilaian") ? "bg-[#CF3C3C] text-white" : "text-gray-500"
+              }`}
+            >
+              <User className="w-5 h-5 mr-3" />
+              Penilaian
+            </Link>
+          )}
           {/* <button
             onClick={handleLogout}
             className="w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium text-gray-500 hover:bg-red-500 hover:text-white"
