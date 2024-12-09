@@ -213,26 +213,27 @@ const DetailKaryawan = () => {
             </Button>
           </div>
         </div>
+        {[1, 2].includes(parseInt(localStorage.getItem("role") || "0", 10)) && (
         <div className="flex">
-        <Button
-          variant="outline"
-          className={`flex items-center gap-2 px-4 py-2 text-lg ${
-            isEditing
-              ? "" // Warna biru untuk "Cancel"
-              : "bg-red-100 text-red-500 hover:bg-[#CF3C3C] hover:text-white" // Warna merah untuk "Edit"
-          }`}
-          onClick={() => setIsEditing(!isEditing)}
-        >
-          {!isEditing && <Pencil className="w-5 h-5" />} {/* Tambahkan ikon jika tidak sedang mengedit */}
-          {isEditing ? "Cancel" : "Edit Data"}
-        </Button>
-          {isEditing && (
-          <Button className="ml-4 px-4 py-2 text-lg bg-red-100 text-red-500 hover:bg-[#CF3C3C] hover:text-white" onClick={handleSave}>
-            Save
+          <Button
+            variant="outline"
+            className={`flex items-center gap-2 px-4 py-2 text-lg ${
+              isEditing
+                ? "" // Warna biru untuk "Cancel"
+                : "bg-red-100 text-red-500 hover:bg-[#CF3C3C] hover:text-white" // Warna merah untuk "Edit"
+            }`}
+            onClick={() => setIsEditing(!isEditing)}
+          >
+            {!isEditing && <Pencil className="w-5 h-5" />} {/* Tambahkan ikon jika tidak sedang mengedit */}
+            {isEditing ? "Cancel" : "Edit Data"}
           </Button>
-        )}
+            {isEditing && (
+            <Button className="ml-4 px-4 py-2 text-lg bg-red-100 text-red-500 hover:bg-[#CF3C3C] hover:text-white" onClick={handleSave}>
+              Save
+            </Button>
+          )}
         </div>
-
+        )}
       </div>
 
       {/* Detail Section */}
@@ -284,7 +285,7 @@ const DetailKaryawan = () => {
                   </div>
 
                   <div>
-                    <p className="text-sm text-[#ABABAB]">Status</p>
+                    <p className="text-sm text-[#ABABAB]">Status Pernikahan</p>
                     {isEditing ? (
                       <select
                         value={formData.status_pernikahan || ""}

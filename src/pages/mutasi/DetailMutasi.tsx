@@ -47,6 +47,30 @@ const fetchMutasiDetail = async (perner: string): Promise<DetailMutasi> => {
   return response.json();
 };
 
+const updateMutasi = async (perner: string, updatedData: Partial<DetailMutasi>): Promise<void> => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    throw new Error("Token tidak ditemukan.");
+  }
+
+  const response = await fetch(
+    `https://dome-backend-5uxq.onrender.com/mutasi/update/${perner}`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedData),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+};
+
 const approveMutasi = async (perner: string, navigate: Function) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -67,7 +91,6 @@ const approveMutasi = async (perner: string, navigate: Function) => {
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
-  // Redirect to mutasi page after success
   navigate("/mutasi");
 };
 
@@ -76,52 +99,17 @@ const DetailMutasi = () => {
   const [data, setData] = useState<DetailMutasi | null>(null);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const [reason, setReason] = useState<string>(""); // Reason for rejection
-  const [isRejecting, setIsRejecting] = useState<boolean>(false); // Track if rejection is being edited
-
-  const rejectMutasi = async (perner: string, reason: string, navigate: Function) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Token tidak ditemukan. Silakan login kembali.");
-      return;
-    }
-  
-    try {
-      const response = await fetch(
-        `https://dome-backend-5uxq.onrender.com/mutasi/${perner}/penolakan`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ alasan_penolakan: reason }),
-        }
-      );
-  
-      if (!response.ok) {
-        const errorData = await response.json(); // Tangkap pesan error dari server
-        console.error("Respons error dari server:", errorData);
-        alert(`Error: ${errorData.message || "Gagal melakukan penolakan."}`);
-        return;
-      }
-    // Perbarui data jika berhasil
-      setData((prevData) =>
-        prevData ? { ...prevData, status_mutasi: "Ditolak", alasan_penolakan: reason } : null
-      );
-      setIsRejecting(false); // Tutup form penolakan
-      } catch (error) {
-        console.error("Kesalahan jaringan:", error);
-        alert("Kesalahan jaringan. Periksa koneksi Anda.");
-      }
-      navigate("/mutasi");
-  };
+  const [reason, setReason] = useState<string>("");
+  const [isRejecting, setIsRejecting] = useState<boolean>(false);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [formData, setFormData] = useState<Partial<DetailMutasi>>({});
 
   useEffect(() => {
     const getData = async () => {
       try {
         const response = await fetchMutasiDetail(perner!);
         setData(response);
+        setFormData(response);
       } catch (err: any) {
         console.error("Gagal mengambil data detail mutasi:", err.message);
         setError("Gagal mengambil data. Periksa koneksi Anda.");
@@ -131,6 +119,31 @@ const DetailMutasi = () => {
     getData();
   }, [perner]);
 
+  const handleReject = () => {
+    setIsRejecting(true);
+  };
+
+  const handleCancel = () => {
+    setIsRejecting(false);
+    setReason("");
+  };
+
+  const handleSave = async () => {
+    try {
+      await updateMutasi(perner!, formData);
+      alert("Data berhasil diperbarui!");
+      setData({ ...data, ...formData } as DetailMutasi);
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Gagal memperbarui data:", err);
+      alert("Gagal memperbarui data.");
+    }
+  };
+
+  const handleInputChange = (field: keyof DetailMutasi, value: string) => {
+    setFormData({ ...formData, [field]: value });
+  };
+
   if (error) {
     return <div className="text-red-500 text-center">{error}</div>;
   }
@@ -139,16 +152,6 @@ const DetailMutasi = () => {
     return <div className="text-center">Loading...</div>;
   }
 
-  const handleReject = () => {
-    setIsRejecting(true); // Enable the rejection form
-  };
-
-  const handleCancel = () => {
-    setIsRejecting(false); // Disable the rejection form
-    setReason(""); // Clear the reason input
-  };
-
-  // Mendefinisikan warna, ikon, dan teks berdasarkan status
   const getStatusProps = () => {
     switch (data.status_mutasi.toLowerCase()) {
       case "diproses":
@@ -189,8 +192,7 @@ const DetailMutasi = () => {
   const { badgeColor, alertColor, icon, alertTitle, alertDescription } = getStatusProps();
 
   return (
-    <div className="p-10 space-y-6">
-      {/* Back Button */}
+    <div className="p-8 bg-gray-50 min-h-screen">
       <div className="flex items-center gap-4 mb-8">
         <button
           onClick={() => navigate(-1)}
@@ -199,18 +201,37 @@ const DetailMutasi = () => {
           <ArrowLeft className="w-5 h-5 mr-2" />
           <span className="text-xl font-semibold text-blue-900">Detail Karyawan Mutasi</span>
         </button>
+        <Button onClick={() => setIsEditing(!isEditing)}>{isEditing ? "Cancel" : "Edit"}</Button>
       </div>
 
-      {/* Wrapper untuk semua elemen utama dengan border */}
-      <div className="border border-[#E9E9E9] rounded-lg p-6 space-y-8">
-        {/* Header Status */}
+      <div>
+          <div className="flex gap-4">
+            <h1 className="text-3xl font-bold text-black">{data.nama}</h1>
+            <Badge className="bg-red-100 text-red-500 px-3 text-sm">
+              {data.posisi_pekerjaan}
+            </Badge>
+          </div>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="text-sm font-semibold text-gray-500">Perner</span>
+            <span className="text-lg text-red-600 font-semibold">{data.perner}</span>
+            {/* <Button
+              variant="outline"
+              size="sm"
+              className="ml-2"
+              onClick={handleCopyPerner}
+            >
+              <Clipboard className="w-4 h-4 text-gray-600" />
+            </Button> */}
+          </div>
+        </div>
+
+      <div className="mt-8 bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-8">
         <div className="space-y-4">
           <div className="flex gap-4">
             <h2 className="text-lg font-bold">Status Mutasi</h2>
             <Badge className={badgeColor}>{data.status_mutasi}</Badge>
           </div>
 
-          {/* Alert Status */}
           <Alert className={`flex items-center ${alertColor}`}>
             {icon}
             <AlertDescription>
@@ -221,10 +242,8 @@ const DetailMutasi = () => {
           </Alert>
         </div>
 
-        {/* Informasi Tambahan */}
         <div className="grid grid-cols-2 gap-8">
-          {/* Informasi Pekerjaan Saat Ini */}
-          <div>
+        <div>
             <h3 className="text-red-500 font-bold mb-4">Informasi Pekerjaan Saat Ini</h3>
             <div className="space-y-4">
               <div>
@@ -249,69 +268,51 @@ const DetailMutasi = () => {
               </div>
             </div>
           </div>
-
-          {/* Informasi Mutasi */}
           <div>
             <h3 className="text-red-500 font-bold mb-4">Mutasi</h3>
             <div className="space-y-4">
               <div>
                 <Label>Unit Baru</Label>
-                <Input value={data.unit_baru} disabled />
+                {isEditing ? (
+                  <Input
+                    value={formData.unit_baru || ""}
+                    onChange={(e) => handleInputChange("unit_baru", e.target.value)}
+                  />
+                ) : (
+                  <p>{data.unit_baru}</p>
+                )}
               </div>
               <div>
                 <Label>Sub Unit Baru</Label>
-                <Input value={data.sub_unit_baru} disabled />
+                {isEditing ? (
+                  <Input
+                    value={formData.sub_unit_baru || ""}
+                    onChange={(e) => handleInputChange("sub_unit_baru", e.target.value)}
+                  />
+                ) : (
+                  <p>{data.sub_unit_baru}</p>
+                )}
               </div>
               <div>
                 <Label>Posisi Baru</Label>
-                <Input value={data.posisi_baru} disabled />
+                {isEditing ? (
+                  <Input
+                    value={formData.posisi_baru || ""}
+                    onChange={(e) => handleInputChange("posisi_baru", e.target.value)}
+                  />
+                ) : (
+                  <p>{data.posisi_baru}</p>
+                )}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Approve dan Reject */}
-        {parseInt(localStorage.getItem("role") || "0", 10) === 4 && (
-        <div className="flex gap-4 justify-center mt-6">
-          <Button
-            onClick={() => approveMutasi(data.perner, navigate)}
-            className="bg-green-500 hover:bg-green-600"
-          >
-            Approve
-          </Button>
-          <Button
-            onClick={handleReject}
-            className="bg-red-500 hover:bg-red-600"
-          >
-            Reject
-          </Button>
-        </div>
-        )}
-
-        {/* Konfirmasi Penolakan */}
-        {isRejecting && (
-          <div className="mt-6">
-            <Input
-              type="text"
-              placeholder="Enter rejection reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              className="mb-4"
-            />
-            <div className="flex gap-4 justify-center">
-              <Button
-                onClick={() => rejectMutasi(data.perner, reason, navigate)}
-                className="bg-red-500 hover:bg-red-600"
-              >
-                Confirm Reject
-              </Button>
-              <Button
-                onClick={handleCancel}
-                className="bg-gray-500 hover:bg-gray-600"
-              >
-                Cancel
-              </Button>
-            </div>
+        {isEditing && (
+          <div className="flex justify-center mt-6">
+            <Button onClick={handleSave} className="bg-green-500 hover:bg-green-600">
+              Save Changes
+            </Button>
           </div>
         )}
       </div>
