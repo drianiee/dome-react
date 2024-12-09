@@ -2,7 +2,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CheckCircle, AlertCircle, AlertTriangle, XCircle, Pencil, Clipboard} from "lucide-react";
@@ -410,29 +409,29 @@ const DetailMutasi = () => {
           </Alert>
         </div>
 
-        <div className="grid grid-cols-2 gap-8">
+        <div className="grid grid-cols-2 gap-6">
         <div>
             <h3 className="text-red-500 font-bold mb-4">Informasi Pekerjaan Saat Ini</h3>
             <div className="space-y-4">
               <div>
-                <Label className="font-bold">Unit</Label>
-                <p>{data.unit}</p>
+                <p className="text-sm text-[#ABABAB]">Unit</p>
+                <p className="text-base font-semibold">{data.unit}</p>
               </div>
               <div>
-                <Label className="font-bold">Sub Unit</Label>
-                <p>{data.sub_unit}</p>
+                <p className="text-sm text-[#ABABAB]">Sub Unit</p>
+                <p className="text-base font-semibold">{data.sub_unit}</p>
               </div>
               <div>
-                <Label className="font-bold">NIK Atasan</Label>
-                <p>{data.nik_atasan}</p>
+                <p className="text-sm text-[#ABABAB]">NIK Atasan</p>
+                <p className="text-base font-semibold">{data.nik_atasan}</p>
               </div>
               <div>
-                <Label className="font-bold">Nama Atasan</Label>
-                <p>{data.nama_atasan}</p>
+                <p className="text-sm text-[#ABABAB]">Nama Atasan</p>
+                <p className="text-base font-semibold">{data.nama_atasan}</p>
               </div>
               <div>
-                <Label className="font-bold">Posisi</Label>
-                <p>{data.posisi_pekerjaan}</p>
+                <p className="text-sm text-[#ABABAB]">Posisi</p>
+                <p className="text-base font-semibold">{data.posisi_pekerjaan}</p>
               </div>
             </div>
           </div>
@@ -440,7 +439,7 @@ const DetailMutasi = () => {
             <h3 className="text-red-500 font-bold mb-4">Mutasi</h3>
             <div className="space-y-4">
               <div>
-                <Label>Unit Baru</Label>
+                <p className="text-sm text-[#ABABAB]">Unit Baru</p>
                 {isEditing ? (
                   <select
                     className="border rounded-md w-full p-2"
@@ -455,11 +454,11 @@ const DetailMutasi = () => {
                     ))}
                   </select>
                 ) : (
-                  <p>{data.unit_baru}</p>
+                  <p className="text-base font-semibold">{data.unit_baru}</p>
                 )}
               </div>
               <div>
-                <Label>Sub Unit Baru</Label>
+                <p className="text-sm text-[#ABABAB]">Sub-Unit Baru</p>
                 {isEditing ? (
                   <select
                     className="border rounded-md w-full p-2"
@@ -474,18 +473,18 @@ const DetailMutasi = () => {
                     ))}
                   </select>
                 ) : (
-                  <p>{data.sub_unit_baru}</p>
+                  <p className="text-base font-semibold">{data.sub_unit_baru}</p>
                 )}
               </div>
               <div>
-                <Label>Posisi Baru</Label>
+                <p className="text-sm text-[#ABABAB]">Posisi Baru</p>
                 {isEditing ? (
                   <Input
                     value={formData.posisi_baru || ""}
                     onChange={(e) => handleInputChange("posisi_baru", e.target.value)}
                   />
                 ) : (
-                  <p>{data.posisi_baru}</p>
+                  <p className="text-base font-semibold">{data.posisi_baru}</p>
                 )}
               </div>
             </div>
