@@ -291,7 +291,6 @@ const DetailMutasi = () => {
           <ArrowLeft className="w-5 h-5 mr-2" />
           <span className="text-xl font-semibold text-blue-900">Detail Mutasi</span>
         </button>
-        {/* <Button onClick={() => setIsEditing(!isEditing)}>{isEditing ? "Cancel" : "Edit"}</Button> */}
       </div>
 
       <div className="flex items-end mb-4 justify-between">
@@ -315,27 +314,32 @@ const DetailMutasi = () => {
             </Button>
           </div>
         </div>
-        {[1, 2].includes(parseInt(localStorage.getItem("role") || "0", 10)) && (
-        <div className="flex">
-          <Button
-            variant="outline"
-            className={`flex items-center gap-2 px-4 py-2 text-base ${
-              isEditing
-                ? "" // Warna untuk "Cancel"
-                : "bg-red-100 text-red-500 hover:bg-[#CF3C3C] hover:text-white" // Warna untuk "Edit"
-            }`}
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            {!isEditing && <Pencil className="w-5 h-5" />} {/* Tambahkan ikon jika tidak sedang mengedit */}
-            {isEditing ? "Cancel" : "Edit Data"}
-          </Button>
-            {isEditing && (
-            <Button className="ml-4 px-4 py-2 text-base bg-red-100 text-red-500 hover:bg-[#CF3C3C] hover:text-white" onClick={handleSave}>
-              Save
-            </Button>
+        {[1, 2].includes(parseInt(localStorage.getItem("role") || "0", 10)) &&
+          !["Disetujui", "Ditolak"].includes(data.status_mutasi) && ( // Tambahkan kondisi
+            <div className="flex">
+              <Button
+                variant="outline"
+                className={`flex items-center gap-2 px-4 py-2 text-base ${
+                  isEditing
+                    ? "" // Warna untuk "Cancel"
+                    : "bg-red-100 text-red-500 hover:bg-[#CF3C3C] hover:text-white" // Warna untuk "Edit"
+                }`}
+                onClick={() => setIsEditing(!isEditing)}
+              >
+                {!isEditing && <Pencil className="w-5 h-5" />} {/* Tambahkan ikon jika tidak sedang mengedit */}
+                {isEditing ? "Cancel" : "Edit Data"}
+              </Button>
+              {isEditing && (
+                <Button
+                  className="ml-4 px-4 py-2 text-base bg-red-100 text-red-500 hover:bg-[#CF3C3C] hover:text-white"
+                  onClick={handleSave}
+                >
+                  Save
+                </Button>
+              )}
+            </div>
           )}
-        </div>
-        )}
+
         {parseInt(localStorage.getItem("role") || "0", 10) === 4 && (
           <div className="flex gap-4 justify-center mt-6">
             <Button
@@ -388,31 +392,6 @@ const DetailMutasi = () => {
             </div>
           </DialogContent>
         </Dialog>
-        {/* {isRejecting && (
-          <div className="mt-6">
-            <Input
-              type="text"
-              placeholder="Enter rejection reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              className="mb-4"
-            />
-            <div className="flex gap-4 justify-center">
-            <Button
-              onClick={() => rejectMutasi(data.perner, reason, navigate)}
-              className="bg-red-500 hover:bg-red-600"
-            >
-              Confirm Reject
-            </Button>
-              <Button
-                onClick={handleCancel}
-                className="bg-gray-500 hover:bg-gray-600"
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )} */}
       </div>
 
       <div className="mt-8 bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-8">
@@ -513,32 +492,6 @@ const DetailMutasi = () => {
           </div>
         </div>
       </div>
-        {/* Konfirmasi Penolakan */}
-        {/* {isRejecting && (
-          <div className="mt-6">
-            <Input
-              type="text"
-              placeholder="Enter rejection reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              className="mb-4"
-            />
-            <div className="flex gap-4 justify-center">
-            <Button
-              onClick={() => rejectMutasi(data.perner, reason, navigate)}
-              className="bg-red-500 hover:bg-red-600"
-            >
-              Confirm Reject
-            </Button>
-              <Button
-                onClick={handleCancel}
-                className="bg-gray-500 hover:bg-gray-600"
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )} */}
     </div>
   );
 };
