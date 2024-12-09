@@ -5,7 +5,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle, AlertCircle, AlertTriangle, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, AlertCircle, AlertTriangle, XCircle, Pencil, Clipboard} from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type DetailMutasi = {
   status_mutasi: string;
@@ -21,6 +22,11 @@ type DetailMutasi = {
   posisi_baru: string;
   created_at: string;
   alasan_penolakan?: string;
+};
+
+type UnitData = {
+  unit_baru: string;
+  sub_unit_baru: string[];
 };
 
 const fetchMutasiDetail = async (perner: string): Promise<DetailMutasi> => {
@@ -44,6 +50,12 @@ const fetchMutasiDetail = async (perner: string): Promise<DetailMutasi> => {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
+  return response.json();
+};
+
+const fetchUnitData = async (): Promise<UnitData[]> => {
+  const response = await fetch("https://dome-backend-5uxq.onrender.com/unit-dropdown");
+  if (!response.ok) throw new Error("Gagal mengambil data unit.");
   return response.json();
 };
 
@@ -71,28 +83,8 @@ const updateMutasi = async (perner: string, updatedData: Partial<DetailMutasi>):
   }
 };
 
-const approveMutasi = async (perner: string, navigate: Function) => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    throw new Error("Token tidak ditemukan.");
-  }
 
-  const response = await fetch(
-    `https://dome-backend-5uxq.onrender.com/mutasi/${perner}/persetujuan`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    }
-  );
 
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  navigate("/mutasi");
-};
 
 const DetailMutasi = () => {
   const { perner } = useParams<{ perner: string }>();
@@ -100,42 +92,140 @@ const DetailMutasi = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const [reason, setReason] = useState<string>("");
-  const [isRejecting, setIsRejecting] = useState<boolean>(false);
+  // const [isRejecting, setIsRejecting] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [formData, setFormData] = useState<Partial<DetailMutasi>>({});
+  const [unitData, setUnitData] = useState<UnitData[]>([]);
+  const [subUnitOptions, setSubUnitOptions] = useState<string[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  
+  const rejectMutasi = async (perner: string, reason: string) => {
+    // const rejectMutasi = async (perner: string, reason: string, navigate: Function) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Token tidak ditemukan. Silakan login kembali.");
+      return;
+    }
+  
+    try {
+      const response = await fetch(
+        `https://dome-backend-5uxq.onrender.com/mutasi/${perner}/penolakan`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ alasan_penolakan: reason }),
+        }
+      );
+  
+      if (!response.ok) {
+        const errorData = await response.json(); // Tangkap pesan error dari server
+        console.error("Respons error dari server:", errorData);
+        alert(`Error: ${errorData.message || "Gagal melakukan penolakan."}`);
+        return;
+      }
+  
+      // Perbarui data jika berhasil
+      setData((prevData) =>
+        prevData ? { ...prevData, status_mutasi: "Ditolak", alasan_penolakan: reason } : null
+      );
+      // setIsRejecting(false); // Tutup form penolakan
+      // navigate("/mutasi"); // Redirect setelah berhasil
+    } catch (error) {
+      console.error("Kesalahan jaringan:", error);
+      alert("Kesalahan jaringan. Periksa koneksi Anda.");
+    }
+  };
+
+  const approveMutasi = async (perner: string) => {
+    //  const approveMutasi = async (perner: string, navigate: Function) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Token tidak ditemukan. Silakan login kembali.");
+      return;
+    }
+  
+    try {
+      const response = await fetch(
+        `https://dome-backend-5uxq.onrender.com/mutasi/${perner}/persetujuan`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(`Gagal menyetujui mutasi: ${errorData.message}`);
+        return;
+      }
+  
+      // Perbarui status di state `data`
+      setData((prevData) =>
+        prevData ? { ...prevData, status_mutasi: "Disetujui" } : null
+      );
+  
+      // alert("Mutasi berhasil disetujui!");
+    } catch (error) {
+      console.error("Kesalahan jaringan:", error);
+      alert("Kesalahan jaringan. Periksa koneksi Anda.");
+    }
+  };
+  
+  
+  const handleCopyPerner = () => {
+    if (data) {
+      navigator.clipboard.writeText(data.perner);
+    }
+  };
+
+  const handleUnitChange = (unit: string) => {
+    const selectedUnit = unitData.find((u) => u.unit_baru === unit);
+    setFormData({ ...formData, unit_baru: unit, sub_unit_baru: "" });
+    setSubUnitOptions(selectedUnit?.sub_unit_baru || []);
+  };
 
   useEffect(() => {
     const getData = async () => {
       try {
-        const response = await fetchMutasiDetail(perner!);
-        setData(response);
-        setFormData(response);
+        const [mutasiDetail, units] = await Promise.all([fetchMutasiDetail(perner!), fetchUnitData()]);
+        setData(mutasiDetail);
+        setFormData(mutasiDetail);
+        setUnitData(units);
+        const selectedUnit = units.find((u) => u.unit_baru === mutasiDetail.unit_baru);
+        setSubUnitOptions(selectedUnit?.sub_unit_baru || []);
       } catch (err: any) {
-        console.error("Gagal mengambil data detail mutasi:", err.message);
         setError("Gagal mengambil data. Periksa koneksi Anda.");
       }
     };
-
     getData();
   }, [perner]);
 
-  const handleReject = () => {
-    setIsRejecting(true);
-  };
+  // const handleReject = () => {
+  //   setIsRejecting(true);
+  // };
 
-  const handleCancel = () => {
-    setIsRejecting(false);
-    setReason("");
-  };
+  // const handleCancel = () => {
+  //   setIsRejecting(false);
+  //   setReason("");
+  // };
 
   const handleSave = async () => {
     try {
-      await updateMutasi(perner!, formData);
-      alert("Data berhasil diperbarui!");
+      await updateMutasi(perner!, {
+        unit_baru: formData.unit_baru,
+        sub_unit_baru: formData.sub_unit_baru,
+        posisi_baru: formData.posisi_baru,
+      });
       setData({ ...data, ...formData } as DetailMutasi);
       setIsEditing(false);
     } catch (err) {
-      console.error("Gagal memperbarui data:", err);
       alert("Gagal memperbarui data.");
     }
   };
@@ -199,12 +289,13 @@ const DetailMutasi = () => {
           className="flex items-center text-gray-700 hover:text-black transition-all"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />
-          <span className="text-xl font-semibold text-blue-900">Detail Karyawan Mutasi</span>
+          <span className="text-xl font-semibold text-blue-900">Detail Mutasi</span>
         </button>
-        <Button onClick={() => setIsEditing(!isEditing)}>{isEditing ? "Cancel" : "Edit"}</Button>
+        {/* <Button onClick={() => setIsEditing(!isEditing)}>{isEditing ? "Cancel" : "Edit"}</Button> */}
       </div>
 
-      <div>
+      <div className="flex items-end mb-4 justify-between">
+        <div>
           <div className="flex gap-4">
             <h1 className="text-3xl font-bold text-black">{data.nama}</h1>
             <Badge className="bg-red-100 text-red-500 px-3 text-sm">
@@ -214,16 +305,115 @@ const DetailMutasi = () => {
           <div className="flex items-center gap-2 mt-2">
             <span className="text-sm font-semibold text-gray-500">Perner</span>
             <span className="text-lg text-red-600 font-semibold">{data.perner}</span>
-            {/* <Button
+            <Button
               variant="outline"
               size="sm"
               className="ml-2"
               onClick={handleCopyPerner}
             >
               <Clipboard className="w-4 h-4 text-gray-600" />
-            </Button> */}
+            </Button>
           </div>
         </div>
+        {[1, 2].includes(parseInt(localStorage.getItem("role") || "0", 10)) && (
+        <div className="flex">
+          <Button
+            variant="outline"
+            className={`flex items-center gap-2 px-4 py-2 text-base ${
+              isEditing
+                ? "" // Warna untuk "Cancel"
+                : "bg-red-100 text-red-500 hover:bg-[#CF3C3C] hover:text-white" // Warna untuk "Edit"
+            }`}
+            onClick={() => setIsEditing(!isEditing)}
+          >
+            {!isEditing && <Pencil className="w-5 h-5" />} {/* Tambahkan ikon jika tidak sedang mengedit */}
+            {isEditing ? "Cancel" : "Edit Data"}
+          </Button>
+            {isEditing && (
+            <Button className="ml-4 px-4 py-2 text-base bg-red-100 text-red-500 hover:bg-[#CF3C3C] hover:text-white" onClick={handleSave}>
+              Save
+            </Button>
+          )}
+        </div>
+        )}
+        {parseInt(localStorage.getItem("role") || "0", 10) === 4 && (
+          <div className="flex gap-4 justify-center mt-6">
+            <Button
+              onClick={() => approveMutasi(data.perner)}
+              className="bg-[#a9e6bb] text-[#065F46] hover:bg-[#4ea468] hover:text-white"
+            >
+              Setujui
+            </Button>
+            <Button
+            onClick={() => {
+              setIsDialogOpen(true);
+              // handleReject();
+            }}              
+            className="bg-red-100 text-[#991B1B] hover:bg-[#CF3C3C] hover:text-white"
+            >
+              Tolak
+            </Button>
+          </div>
+        )}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Konfirmasi Penolakan</DialogTitle>
+            </DialogHeader>
+            <div className="mt-6">
+              <Input
+                type="text"
+                placeholder="Masukkan alasan penolakan"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                className="mb-4"
+              />
+              <div className="flex gap-4 justify-center">
+                <Button
+                  onClick={() => {
+                    rejectMutasi(data.perner, reason); // Panggil handleReject di sini
+                    setIsDialogOpen(false); // Tutup dialog setelah konfirmasi
+                  }}
+                  className="bg-red-500 hover:bg-red-600"
+                >
+                  Konfirmasi Tolak
+                </Button>
+                <Button
+                  onClick={() => setIsDialogOpen(false)} // Batalkan dan tutup dialog
+                  className="bg-gray-500 hover:bg-gray-600"
+                >
+                  Batal
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+        {/* {isRejecting && (
+          <div className="mt-6">
+            <Input
+              type="text"
+              placeholder="Enter rejection reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="mb-4"
+            />
+            <div className="flex gap-4 justify-center">
+            <Button
+              onClick={() => rejectMutasi(data.perner, reason, navigate)}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Confirm Reject
+            </Button>
+              <Button
+                onClick={handleCancel}
+                className="bg-gray-500 hover:bg-gray-600"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )} */}
+      </div>
 
       <div className="mt-8 bg-white border border-gray-200 rounded-lg shadow-sm p-6 space-y-8">
         <div className="space-y-4">
@@ -231,8 +421,7 @@ const DetailMutasi = () => {
             <h2 className="text-lg font-bold">Status Mutasi</h2>
             <Badge className={badgeColor}>{data.status_mutasi}</Badge>
           </div>
-
-          <Alert className={`flex items-center ${alertColor}`}>
+          <Alert className={`flex items-center  ${alertColor}`}>
             {icon}
             <AlertDescription>
               <strong>{alertTitle}</strong>
@@ -274,10 +463,18 @@ const DetailMutasi = () => {
               <div>
                 <Label>Unit Baru</Label>
                 {isEditing ? (
-                  <Input
+                  <select
+                    className="border rounded-md w-full p-2"
                     value={formData.unit_baru || ""}
-                    onChange={(e) => handleInputChange("unit_baru", e.target.value)}
-                  />
+                    onChange={(e) => handleUnitChange(e.target.value)}
+                  >
+                    <option value="">Pilih Unit</option>
+                    {unitData.map((unit) => (
+                      <option key={unit.unit_baru} value={unit.unit_baru}>
+                        {unit.unit_baru}
+                      </option>
+                    ))}
+                  </select>
                 ) : (
                   <p>{data.unit_baru}</p>
                 )}
@@ -285,10 +482,18 @@ const DetailMutasi = () => {
               <div>
                 <Label>Sub Unit Baru</Label>
                 {isEditing ? (
-                  <Input
+                  <select
+                    className="border rounded-md w-full p-2"
                     value={formData.sub_unit_baru || ""}
-                    onChange={(e) => handleInputChange("sub_unit_baru", e.target.value)}
-                  />
+                    onChange={(e) => setFormData({ ...formData, sub_unit_baru: e.target.value })}
+                  >
+                    <option value="">Pilih Sub Unit</option>
+                    {subUnitOptions.map((subUnit) => (
+                      <option key={subUnit} value={subUnit}>
+                        {subUnit}
+                      </option>
+                    ))}
+                  </select>
                 ) : (
                   <p>{data.sub_unit_baru}</p>
                 )}
@@ -307,15 +512,33 @@ const DetailMutasi = () => {
             </div>
           </div>
         </div>
-
-        {isEditing && (
-          <div className="flex justify-center mt-6">
-            <Button onClick={handleSave} className="bg-green-500 hover:bg-green-600">
-              Save Changes
-            </Button>
-          </div>
-        )}
       </div>
+        {/* Konfirmasi Penolakan */}
+        {/* {isRejecting && (
+          <div className="mt-6">
+            <Input
+              type="text"
+              placeholder="Enter rejection reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="mb-4"
+            />
+            <div className="flex gap-4 justify-center">
+            <Button
+              onClick={() => rejectMutasi(data.perner, reason, navigate)}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Confirm Reject
+            </Button>
+              <Button
+                onClick={handleCancel}
+                className="bg-gray-500 hover:bg-gray-600"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )} */}
     </div>
   );
 };

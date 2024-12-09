@@ -217,7 +217,7 @@ const DetailKaryawan = () => {
         <div className="flex">
           <Button
             variant="outline"
-            className={`flex items-center gap-2 px-4 py-2 text-lg ${
+            className={`flex items-center gap-2 px-4 py-2 text-base ${
               isEditing
                 ? "" // Warna biru untuk "Cancel"
                 : "bg-red-100 text-red-500 hover:bg-[#CF3C3C] hover:text-white" // Warna merah untuk "Edit"
@@ -228,7 +228,7 @@ const DetailKaryawan = () => {
             {isEditing ? "Cancel" : "Edit Data"}
           </Button>
             {isEditing && (
-            <Button className="ml-4 px-4 py-2 text-lg bg-red-100 text-red-500 hover:bg-[#CF3C3C] hover:text-white" onClick={handleSave}>
+            <Button className="ml-4 px-4 py-2 text-base bg-red-100 text-red-500 hover:bg-[#CF3C3C] hover:text-white" onClick={handleSave}>
               Save
             </Button>
           )}
