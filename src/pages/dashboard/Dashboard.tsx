@@ -184,13 +184,9 @@ const Dashboard = () => {
                 <Bar dataKey="jumlah" fill="#007bff" />
               </BarChart>
             </ResponsiveContainer>
-
             </div>
           </CardContent>
-
-
         </Card>
-
         {/* Pie Charts */}
         <Card>
           <CardHeader>

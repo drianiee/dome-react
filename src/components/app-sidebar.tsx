@@ -54,7 +54,7 @@ export function AppSidebar() {
         setChangePasswordSuccess(true);
         setOldPassword("");
         setNewPassword("");
-        alert("Password changed successfully!");
+        // alert("Password changed successfully!");
       }
     } catch (error: any) {
       setChangePasswordSuccess(false);
