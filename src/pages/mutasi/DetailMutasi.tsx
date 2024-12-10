@@ -313,7 +313,7 @@ const DetailMutasi = () => {
             </Button>
           </div>
         </div>
-        {[1, 2].includes(parseInt(localStorage.getItem("role") || "0", 10)) &&
+        {[2].includes(parseInt(localStorage.getItem("role") || "0", 10)) &&
           !["Disetujui", "Ditolak"].includes(data.status_mutasi) && ( // Tambahkan kondisi
             <div className="flex">
               <Button
