@@ -339,25 +339,26 @@ const DetailMutasi = () => {
             </div>
           )}
 
-        {parseInt(localStorage.getItem("role") || "0", 10) === 4 && (
-          <div className="flex gap-4 justify-center mt-6">
-            <Button
-              onClick={() => approveMutasi(data.perner)}
-              className="bg-[#a9e6bb] text-[#065F46] hover:bg-[#4ea468] hover:text-white"
-            >
-              Setujui
-            </Button>
-            <Button
-            onClick={() => {
-              setIsDialogOpen(true);
-              // handleReject();
-            }}              
-            className="bg-red-100 text-[#991B1B] hover:bg-[#CF3C3C] hover:text-white"
-            >
-              Tolak
-            </Button>
-          </div>
-        )}
+          {parseInt(localStorage.getItem("role") || "0", 10) === 4 && (
+          !["Disetujui", "Ditolak"].includes(data.status_mutasi) && ( // Tambahkan kondisi
+            <div className="flex gap-4 justify-center mt-6">
+              <Button
+                onClick={() => approveMutasi(data.perner)}
+                className="bg-[#a9e6bb] text-[#065F46] hover:bg-[#4ea468] hover:text-white"
+              >
+                Setujui
+              </Button>
+              <Button
+              onClick={() => {
+                setIsDialogOpen(true);
+                // handleReject();
+              }}              
+              className="bg-red-100 text-[#991B1B] hover:bg-[#CF3C3C] hover:text-white"
+              >
+                Tolak
+              </Button>
+            </div>
+          ))}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent>
             <DialogHeader>
