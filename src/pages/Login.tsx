@@ -32,7 +32,7 @@ const Login = () => {
       }
 
       const data = await response.json();
-      console.log("Login successful:", data);
+      // console.log("Login successful:", data); //hapus: tidak boleh menampilkan data user login
 
       // Save token and user information to localStorage
       localStorage.setItem("token", data.token);
@@ -42,9 +42,8 @@ const Login = () => {
         JSON.stringify({ name: data.user.name, username: data.user.username })
       ); // Store name and username
 
-      // Debugging: Check the role and log it
-      const userRole = localStorage.getItem("role");
-      console.log("User role from localStorage:", userRole);
+      // const userRole = localStorage.getItem("role"); //hapus: tidak boleh menampilkan data user login
+      // console.log("User role from localStorage:", userRole); //hapus: tidak boleh menampilkan data user login
 
       // Redirect to the dashboard
       navigate("/dashboard");
