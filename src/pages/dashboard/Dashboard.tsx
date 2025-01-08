@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import ListKaryawanHeader from '../../assets/ListKaryawanHeader.png';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+// import {
+//   Select,
+//   SelectTrigger,
+//   SelectValue,
+//   SelectContent,
+//   SelectItem,
+// } from "@/components/ui/select";
 
 import {
   BarChart,
@@ -151,7 +151,7 @@ const Dashboard = () => {
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               Total Karyawan {" "}
-              <Select value={selectedUnit} onValueChange={setSelectedUnit}>
+              {/* <Select value={selectedUnit} onValueChange={setSelectedUnit}>
                 <SelectTrigger className="w-56">
                   <SelectValue placeholder="Pilih Unit" />
                 </SelectTrigger>
@@ -162,7 +162,7 @@ const Dashboard = () => {
                     </SelectItem>
                   ))}
                 </SelectContent>
-              </Select>
+              </Select> */}
             </CardTitle>
           </CardHeader>
           <CardContent>

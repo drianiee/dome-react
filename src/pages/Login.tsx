@@ -1,13 +1,14 @@
 import React, { useState } from "react";
+import { jwtDecode } from "jwt-decode"; // Gunakan ekspor bernama jika ada masalah default
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
-import BackgroundVideo from "../assets/Background.mp4"; // Import video file
+import { useNavigate } from "react-router-dom";
+import BackgroundVideo from "../assets/Background.mp4";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null); // To handle error messages
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -32,18 +33,24 @@ const Login = () => {
       }
 
       const data = await response.json();
-      // console.log("Login successful:", data); //hapus: tidak boleh menampilkan data user login
 
-      // Save token and user information to localStorage
+      // Save token to localStorage
       localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.user.id_roles.toString()); // Save user's role
+
+      // Decode token to get user data
+      const decodedToken: any = jwtDecode(data.token);
+      const { username, name, id_roles } = decodedToken;
+
+      // Console log the decoded user data
+      console.log("Username:", username);
+      console.log("Name:", name);
+      console.log("Role ID:", id_roles);
+
+      // Save decoded user data to localStorage
       localStorage.setItem(
         "user",
-        JSON.stringify({ name: data.user.name, username: data.user.username })
-      ); // Store name and username
-
-      // const userRole = localStorage.getItem("role"); //hapus: tidak boleh menampilkan data user login
-      // console.log("User role from localStorage:", userRole); //hapus: tidak boleh menampilkan data user login
+        JSON.stringify({ username, name, id_roles })
+      );
 
       // Redirect to the dashboard
       navigate("/dashboard");
@@ -55,7 +62,6 @@ const Login = () => {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center">
-      {/* Video Background */}
       <video
         className="absolute top-0 left-0 w-full h-full object-cover"
         src={BackgroundVideo}
@@ -63,12 +69,9 @@ const Login = () => {
         loop
         muted
       />
-
-      {/* Login Form Container */}
       <div className="relative z-10 w-full max-w-md p-6 rounded-md shadow-md bg-white">
         <h1 className="text-2xl font-semibold text-center text-gray-800">Telkom DOME</h1>
 
-        {/* Display error message if any */}
         {error && <div className="text-red-500 text-center mb-4">{error}</div>}
 
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
@@ -97,8 +100,6 @@ const Login = () => {
           </Button>
         </form>
       </div>
-
-      {/* Overlay for darkening background if needed */}
       <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-90"></div>
     </div>
   );

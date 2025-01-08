@@ -11,6 +11,7 @@ import DetailMutasi from "./pages/mutasi/DetailMutasi";
 import AddMutasi from "./pages/mutasi/AddMutasi";
 
 import ListPenilaian from "./pages/penilaian/listpenilaian"
+import PenilaianDetail from "./pages/penilaian/PenilaianDetail";
 
 function App() {
   return (
@@ -90,6 +91,15 @@ function App() {
           element={
             <Layout>
               <ListPenilaian />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/penilaian/:perner"
+          element={
+            <Layout>
+              <PenilaianDetail />
             </Layout>
           }
         />

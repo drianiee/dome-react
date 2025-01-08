@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // Untuk navigasi antar halaman
 import ListKaryawanHeader from '../../assets/ListKaryawanHeader.png';
 import {
   Select,
@@ -16,47 +17,55 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Pencil } from "lucide-react"; // Import ikon Pencil dari Lucide
 
-// Define type for Karyawan data
 type Karyawan = {
   perner: string;
   nama: string;
   unit: string;
   sub_unit: string;
   posisi_pekerjaan: string;
-  sumber_anggaran: string;
-  nik_atasan: number;
-  nama_atasan: string;
-  bergabung_sejak: number;
-  status_karyawan: string;
-  skor_rating: string;
+  skor_rating: string | "-";
+  kategori_hasil_penilaian: string | null;
+  bulan_pemberian: string | null;
+  tahun_pemberian: number | null;
 };
 
-type Rating = {
-  category: string;
-  score: number;
-};
-
-const fetchData = async (bulan: string): Promise<Karyawan[]> => {
+const fetchInitialData = async (): Promise<Karyawan[]> => {
   const token = localStorage.getItem("token");
   if (!token) {
     throw new Error("Token tidak ditemukan. Silakan login kembali.");
   }
 
+  const response = await fetch(`https://dome-backend-5uxq.onrender.com/rating`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+  });
 
-  const formattedBulan = bulan.split("-").reverse().join("-");
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+  const result = await response.json();
+
+  if (!Array.isArray(result)) {
+    console.error("API response is not an array:", result);
+    throw new Error("API tidak mengembalikan array.");
+  }
+
+  return result;
+};
+
+const fetchFilteredData = async (bulan: string, tahun: string): Promise<Karyawan[]> => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("Token tidak ditemukan. Silakan login kembali.");
+  }
+
   const response = await fetch(
-    `https://dome-backend-5uxq.onrender.com/rating?bulan=${formattedBulan}`,
+    `https://dome-backend-5uxq.onrender.com/rating/filter?bulan_pemberian=${bulan}&tahun_pemberian=${tahun}`,
     {
       method: "GET",
       headers: {
@@ -66,137 +75,77 @@ const fetchData = async (bulan: string): Promise<Karyawan[]> => {
       },
     }
   );
+
   if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-  return response.json();
+
+  const result = await response.json();
+
+  if (result && result.data && Array.isArray(result.data)) {
+    return result.data;
+  }
+
+  throw new Error("API tidak mengembalikan array.");
 };
 
 const ListKaryawan = () => {
+  const navigate = useNavigate(); // Untuk navigasi ke halaman detail
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear().toString();
+
   const [data, setData] = useState<Karyawan[]>([]);
+  const [filteredData, setFilteredData] = useState<Karyawan[]>([]);
   const [search, setSearch] = useState<string>("");
-  const [filterBulan, setFilterBulan] = useState<string>(
-    new Date().toISOString().slice(0, 7)
-  );
+  const [filterBulan, setFilterBulan] = useState<string>("");
+  const [filterTahun, setFilterTahun] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
-  const [popup, setPopup] = useState<{ open: boolean; karyawan?: Karyawan }>({
-    open: false,
-  });
-  const [ratings, setRatings] = useState<Rating[]>([
-    { category: "Customer Service Orientation", score: 0 },
-    { category: "Achievement Orientation", score: 0 },
-    { category: "Team Work", score: 0 },
-    { category: "Product Knowledge", score: 0 },
-    { category: "Organization Commitments", score: 0 },
-    { category: "Performance", score: 0 },
-    { category: "Initiative", score: 0 },
-  ]);
+
+  const yearOptions = Array.from({ length: 10 }, (_, i) => (parseInt(currentYear) - 5 + i).toString());
 
   useEffect(() => {
-    const getData = async () => {
+    const getInitialData = async () => {
       try {
-        const response = await fetchData(filterBulan);
+        const response = await fetchInitialData();
         setData(response || []);
+        setFilteredData(response || []);
         setError(null);
       } catch (err: any) {
-        console.error("Failed to fetch data:", err.message);
-        if (err.message.includes("401") || err.message.includes("403")) {
-          setError("Otorisasi gagal. Silakan login kembali.");
-          localStorage.removeItem("token");
-          window.location.href = "/";
-        } else {
-          setError("Gagal mengambil data. Periksa koneksi Anda.");
-        }
+        console.error("Failed to fetch initial data:", err.message);
+        setError("Gagal mengambil data. Periksa koneksi Anda.");
         setData([]);
       }
     };
-    getData();
-  }, [filterBulan]);
+    getInitialData();
+  }, []);
 
-  const handleDetailClick = (karyawan: Karyawan) => {
-    setPopup({ open: true, karyawan });
-  };
+  useEffect(() => {
+    if (!filterBulan || !filterTahun) return;
 
-  const handleRatingChange = (index: number, score: number) => {
-    const updatedRatings = [...ratings];
-    updatedRatings[index].score = score;
-    setRatings(updatedRatings);
-  };
-
-  const handleSubmitRating = async () => {
-    if (!popup.karyawan) return;
-
-    const isValid = ratings.every(
-      (rating) => rating.score >= 1 && rating.score <= 5
-    );
-    if (!isValid) {
-      alert("Semua nilai harus diisi dengan angka 1-5.");
-      return;
-    }
-
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Token tidak ditemukan. Silakan login kembali.");
-      return;
-    }
-
-    const payload = {
-      customer_service_orientation: ratings.find(
-        (r) => r.category === "Customer Service Orientation"
-      )?.score,
-      achievment_orientation: ratings.find(
-        (r) => r.category === "Achievement Orientation"
-      )?.score,
-      team_work: ratings.find((r) => r.category === "Team Work")?.score,
-      product_knowledge: ratings.find(
-        (r) => r.category === "Product Knowledge"
-      )?.score,
-      organization_commitments: ratings.find(
-        (r) => r.category === "Organization Commitments"
-      )?.score,
-      performance: ratings.find((r) => r.category === "Performance")?.score,
-      initiative: ratings.find((r) => r.category === "Initiative")?.score,
+    const getFilteredData = async () => {
+      try {
+        const response = await fetchFilteredData(filterBulan, filterTahun);
+        setData(response || []);
+        setFilteredData(response || []);
+        setError(null);
+      } catch (err: any) {
+        console.error("Failed to fetch filtered data:", err.message);
+        setError("Gagal mengambil data. Periksa koneksi Anda.");
+        setData([]);
+      }
     };
 
-    try {
-      const response = await fetch(
-        `https://dome-backend-5uxq.onrender.com/rating/${popup.karyawan.perner}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+    getFilteredData();
+  }, [filterBulan, filterTahun]);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+  useEffect(() => {
+    const searchData = data.filter((karyawan) =>
+      karyawan.nama.toLowerCase().includes(search.trim().toLowerCase())
+    );
+    setFilteredData(searchData);
+  }, [search, data]);
 
-      const responseData = await response.json();
-
-      if (responseData.total_score && responseData.total_score >= 1 && responseData.total_score <= 100) {
-        const updatedData = data.map((karyawan) =>
-          karyawan.perner === popup.karyawan?.perner
-            ? { ...karyawan, skor_rating: responseData.total_score.toString() }
-            : karyawan
-        );
-        setData(updatedData);
-        alert("Rating berhasil dikirim!");
-      } else {
-        throw new Error("Skor tidak valid dari API.");
-      }
-
-      setPopup({ open: false });
-    } catch (error) {
-      console.error("Rating Berhasil Dikirim:", error);
-      alert("Rating Berhasil Dikirim");
-    }
+  const handleDetailClick = (perner: string) => {
+    navigate(`/penilaian/${perner}`); // Navigasi ke halaman detail
   };
-
-  const filteredData = data.filter((karyawan) =>
-    karyawan.nama.toLowerCase().includes(search.toLowerCase())
-  );
 
   return (
     <div className="p-8">
@@ -205,10 +154,6 @@ const ListKaryawan = () => {
         style={{ backgroundImage: `url(${ListKaryawanHeader})` }}
       >
         <div className="p-8 text-white">
-          <div className="flex gap-2 mb-4">
-            <p className="text-xl text-[#FF0000]">#</p>
-            <p className="text-xl text-gray-300">Elevating Your Future</p>
-          </div>
           <h1 className="text-6xl font-bold">Penilaian Karyawan</h1>
         </div>
       </div>
@@ -218,122 +163,95 @@ const ListKaryawan = () => {
       ) : (
         <>
           <div className="mb-4 flex gap-4 w-full">
-            <div className="flex-grow">
-              <Input
-                type="text"
-                placeholder="Cari karyawan berdasarkan nama..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value.toLowerCase())}
-              />
-            </div>
+            <Input
+              type="text"
+              placeholder="Cari karyawan berdasarkan nama..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
 
-            <div>
-              <Select onValueChange={setFilterBulan}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih Bulan" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2024-12">Desember 2024</SelectItem>
-                  <SelectItem value="2024-11">November 2024</SelectItem>
-                  <SelectItem value="2024-10">Oktober 2024</SelectItem>
-                  <SelectItem value="2024-09">September 2024</SelectItem>
-                  <SelectItem value="2024-08">Agustus 2024</SelectItem>
-                  <SelectItem value="2024-07">Juli 2024</SelectItem>
-                  <SelectItem value="2024-06">Juni 2024</SelectItem>
-                  <SelectItem value="2024-05">Mei 2024</SelectItem>
-                  <SelectItem value="2024-04">April 2024</SelectItem>
-                  <SelectItem value="2024-03">Maret 2024</SelectItem>
-                  <SelectItem value="2024-02">Februari 2024</SelectItem>
-                  <SelectItem value="2024-01">Januari 2024</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Select value={filterBulan} onValueChange={setFilterBulan}>
+              <SelectTrigger>
+                <SelectValue placeholder="Pilih Bulan" />
+              </SelectTrigger>
+              <SelectContent>
+                {[
+                  "Januari",
+                  "Februari",
+                  "Maret",
+                  "April",
+                  "Mei",
+                  "Juni",
+                  "Juli",
+                  "Agustus",
+                  "September",
+                  "Oktober",
+                  "November",
+                  "Desember",
+                ].map((bulan) => (
+                  <SelectItem key={bulan} value={bulan}>
+                    {bulan}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={filterTahun} onValueChange={setFilterTahun}>
+              <SelectTrigger>
+                <SelectValue placeholder="Pilih Tahun" />
+              </SelectTrigger>
+              <SelectContent>
+                {yearOptions.map((tahun) => (
+                  <SelectItem key={tahun} value={tahun}>
+                    {tahun}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="font-bold w-4">Perner</TableHead>
-                <TableHead className="font-bold w-20">Nama</TableHead>
-                <TableHead className="font-bold w-40">Unit</TableHead>
-                <TableHead className="font-bold w-40">Sub Unit</TableHead>
-                <TableHead className="font-bold w-20">Posisi</TableHead>
-                <TableHead className="font-bold w-20">Sumber Anggaran</TableHead>
-                <TableHead className="font-bold w-20">NIK Atasan</TableHead>
-                <TableHead className="font-bold w-20">Nama Atasan</TableHead>
-                <TableHead className="font-bold w-20">Bergabung Sejak</TableHead>
-                <TableHead className="font-bold w-20">Status Karyawan</TableHead>
-                <TableHead className="font-bold w-12">Skor Rating</TableHead>
-                <TableHead className="font-bold w-12">Aksi</TableHead>
+                <TableHead>Perner</TableHead>
+                <TableHead>Nama</TableHead>
+                <TableHead>Unit</TableHead>
+                <TableHead>Sub Unit</TableHead>
+                <TableHead>Posisi</TableHead>
+                <TableHead>Skor Rating</TableHead>
+                <TableHead>Kategori</TableHead>
+                <TableHead>Bulan</TableHead>
+                <TableHead>Tahun</TableHead>
+                <TableHead>Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredData.length > 0 ? (
                 filteredData.map((karyawan) => (
                   <TableRow key={karyawan.perner}>
-                    <TableCell className="w-4">{karyawan.perner}</TableCell>
-                    <TableCell className="w-20">{karyawan.nama}</TableCell>
-                    <TableCell className="w-40">{karyawan.unit}</TableCell>
-                    <TableCell className="w-40">{karyawan.sub_unit}</TableCell>
-                    <TableCell className="w-20">{karyawan.posisi_pekerjaan}</TableCell>
-                    <TableCell className="w-20">{karyawan.sumber_anggaran}</TableCell>
-                    <TableHead className="w-20">{karyawan.nik_atasan}</TableHead>
-                    <TableHead className="w-20">{karyawan.nama_atasan}</TableHead>
-                    <TableHead className="w-20">{karyawan.bergabung_sejak}</TableHead>
-                    <TableHead className="w-20">{karyawan.status_karyawan}</TableHead>
-                    <TableCell className="w-12 text-[#1CB993] font-bold">{karyawan.skor_rating}</TableCell>
-                    <TableCell className="w-12">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <button
-                            onClick={() => handleDetailClick(karyawan)}
-                            className="p-2 border border-[#ACACAC] rounded-md hover:bg-blue-100 transition"
-                          >
-                            {/* Tambahkan ikon Pencil */}
-                            <Pencil size={20} strokeWidth={1.5} className="text-blue-500" />
-                          </button>
-                        </DialogTrigger>
-                        <DialogContent aria-describedby="dialog-description">
-                          <DialogHeader>
-                            <DialogTitle>Penilaian untuk {karyawan.nama}</DialogTitle>
-                          </DialogHeader>
-                          <p id="dialog-description">
-                            Isi penilaian untuk setiap kategori dengan skor antara 1-5.
-                          </p>
-                          <div className="space-y-4">
-                            {ratings.map((rating, index) => (
-                              <div key={index}>
-                                <label className="block font-medium">{rating.category}</label>
-                                <Input
-                                  type="number"
-                                  min={1}
-                                  max={5}
-                                  value={rating.score}
-                                  onChange={(e) =>
-                                    handleRatingChange(index, parseInt(e.target.value, 10) || 0)
-                                  }
-                                />
-                              </div>
-                            ))}
-                          </div>
-                          <DialogFooter>
-                            <Button
-                              variant="outline"
-                              onClick={() => setPopup({ open: false })}
-                            >
-                              Batal
-                            </Button>
-                            <Button onClick={handleSubmitRating}>Kirim</Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
+                    <TableCell>{karyawan.perner}</TableCell>
+                    <TableCell>{karyawan.nama}</TableCell>
+                    <TableCell>{karyawan.unit}</TableCell>
+                    <TableCell>{karyawan.sub_unit}</TableCell>
+                    <TableCell>{karyawan.posisi_pekerjaan}</TableCell>
+                    <TableCell>{karyawan.skor_rating}</TableCell>
+                    <TableCell>{karyawan.kategori_hasil_penilaian || "-"}</TableCell>
+                    <TableCell>{karyawan.bulan_pemberian || "-"}</TableCell>
+                    <TableCell>{karyawan.tahun_pemberian || "-"}</TableCell>
+                    <TableCell>
+                      <Button
+                        onClick={() => handleDetailClick(karyawan.perner)}
+                        variant="outline"
+                      >
+                        Detail
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center">
-                    Tidak ada data tersedia
+                  <TableCell colSpan={10} className="text-center">
+                    Tidak ada data ditemukan
                   </TableCell>
                 </TableRow>
               )}
