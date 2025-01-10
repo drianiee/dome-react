@@ -154,6 +154,10 @@ const ListKaryawan = () => {
         style={{ backgroundImage: `url(${ListKaryawanHeader})` }}
       >
         <div className="p-8 text-white">
+          <div className="flex gap-2 mb-4">
+            <p className="text-xl text-[#FF0000]">#</p>
+            <p className="text-xl text-gray-300">Elevating Your Future</p>
+          </div>          
           <h1 className="text-6xl font-bold">Penilaian Karyawan</h1>
         </div>
       </div>
@@ -223,6 +227,8 @@ const ListKaryawan = () => {
                 <TableHead>Bulan</TableHead>
                 <TableHead>Tahun</TableHead>
                 <TableHead>Aksi</TableHead>
+
+
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -238,14 +244,14 @@ const ListKaryawan = () => {
                     <TableCell>{karyawan.kategori_hasil_penilaian || "-"}</TableCell>
                     <TableCell>{karyawan.bulan_pemberian || "-"}</TableCell>
                     <TableCell>{karyawan.tahun_pemberian || "-"}</TableCell>
-                    <TableCell>
-                      <Button
-                        onClick={() => handleDetailClick(karyawan.perner)}
-                        variant="outline"
-                      >
-                        Detail
-                      </Button>
-                    </TableCell>
+                      <TableCell>
+                        <Button
+                          onClick={() => handleDetailClick(karyawan.perner)}
+                          variant="outline"
+                        >
+                          Detail
+                        </Button>
+                      </TableCell>
                   </TableRow>
                 ))
               ) : (
