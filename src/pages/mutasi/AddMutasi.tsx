@@ -101,7 +101,7 @@ const AddMutasi = () => {
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const role = parseInt(localStorage.getItem("role") || "0", 10);
+  // const role = parseInt(localStorage.getItem("role") || "0", 10);
   const [userRole, setUserRole] = useState<number | null>(null); // State untuk role pengguna
 
   useEffect(() => {
@@ -109,12 +109,13 @@ const AddMutasi = () => {
     if (token) {
       try {
         const decoded: TokenPayload = jwtDecode(token);
-        setUserRole(decoded.id_roles); // Simpan role pengguna
+        setUserRole(decoded.id_roles); // Remove this line
       } catch (err) {
         console.error("Failed to decode token:", err);
       }
     }
   }, []);
+  
 
   useEffect(() => {
     const getKaryawanData = async () => {
@@ -192,7 +193,7 @@ const AddMutasi = () => {
   };
 
   const selectedUnit = dropdownData.find((item) => item.unit_baru === unitBaru);
-  if (role !== 2) {
+  if (userRole !== 2) {
     return <div>Anda tidak memiliki akses ke halaman ini.</div>;
   }
   return (
