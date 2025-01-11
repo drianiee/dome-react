@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import ListKaryawanHeader from "../../assets/ListKaryawanHeader.png";
 import { Pencil, Trash } from "lucide-react"; // Import ikon Pencil dari Lucide
+import { jwtDecode } from "jwt-decode";
 import {
   Table,
   TableBody,
@@ -16,6 +17,11 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, Dialo
 
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
+
+type TokenPayload = {
+  id_roles: number;
+  [key: string]: any;
+};
 
 type Karyawan = {
   perner: string;
@@ -97,6 +103,7 @@ const Mutasi = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<number | null>(null); // State untuk role pengguna
 
   useEffect(() => {
     const loadData = async () => {
@@ -113,6 +120,18 @@ const Mutasi = () => {
     };
 
     loadData();
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded: TokenPayload = jwtDecode(token);
+        setUserRole(decoded.id_roles); // Simpan role pengguna
+      } catch (err) {
+        console.error("Failed to decode token:", err);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -186,11 +205,11 @@ const Mutasi = () => {
           value={searchMutasi}
           onChange={(e) => setSearchMutasi(e.target.value)}
         />
-        {parseInt(localStorage.getItem("role") || "0", 10) === 2 && (
+        {userRole === 2 ? (
           <Button onClick={() => setIsDialogOpen(true)} className="ml-4 bg-[#CF3C3C] text-white hover:bg-red-400" >
             Add Mutasi
           </Button>
-        )}
+        ) : null}
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -300,7 +319,7 @@ const Mutasi = () => {
                 </button>
 
                 {/* Tombol Delete */}
-                {parseInt(localStorage.getItem("role") || "0", 10) === 2 && (
+                {userRole === 2 ? (
                   <Dialog>
                     <DialogTrigger asChild>
                       <button
@@ -327,7 +346,7 @@ const Mutasi = () => {
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
-                )}
+                ) : null}
               </div>
               </TableCell>
 

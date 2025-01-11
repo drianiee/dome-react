@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react"; // Import ikon dari lucide-react
 import { useNavigate, useParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { jwtDecode } from "jwt-decode";
 import {
   Card,
   CardHeader,
@@ -18,6 +19,11 @@ import {
   SelectContent,
   SelectValue,
 } from "@/components/ui/select";
+
+type TokenPayload = {
+  id_roles: number;
+  [key: string]: any;
+};
 
 type Karyawan = {
   perner: string;
@@ -96,6 +102,19 @@ const AddMutasi = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const role = parseInt(localStorage.getItem("role") || "0", 10);
+  const [userRole, setUserRole] = useState<number | null>(null); // State untuk role pengguna
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded: TokenPayload = jwtDecode(token);
+        setUserRole(decoded.id_roles); // Simpan role pengguna
+      } catch (err) {
+        console.error("Failed to decode token:", err);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const getKaryawanData = async () => {

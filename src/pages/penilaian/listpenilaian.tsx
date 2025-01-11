@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Untuk navigasi antar halaman
+import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import ListKaryawanHeader from '../../assets/ListKaryawanHeader.png';
+
 import {
   Select,
   SelectContent,
@@ -18,6 +20,12 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+
+// Tambahkan tipe untuk payload token jika diperlukan
+type TokenPayload = {
+  id_roles: number;
+  [key: string]: any;
+};
 
 type Karyawan = {
   perner: string;
@@ -87,8 +95,9 @@ const fetchFilteredData = async (bulan: string, tahun: string): Promise<Karyawan
   throw new Error("API tidak mengembalikan array.");
 };
 
+
 const ListKaryawan = () => {
-  const navigate = useNavigate(); // Untuk navigasi ke halaman detail
+  const navigate = useNavigate();
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear().toString();
 
@@ -98,8 +107,22 @@ const ListKaryawan = () => {
   const [filterBulan, setFilterBulan] = useState<string>("");
   const [filterTahun, setFilterTahun] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<number | null>(null); // State untuk role pengguna
 
   const yearOptions = Array.from({ length: 10 }, (_, i) => (parseInt(currentYear) - 5 + i).toString());
+
+  // Ambil role dari token saat komponen dimuat
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded: TokenPayload = jwtDecode(token);
+        setUserRole(decoded.id_roles); // Simpan role pengguna
+      } catch (err) {
+        console.error("Failed to decode token:", err);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const getInitialData = async () => {
@@ -144,7 +167,7 @@ const ListKaryawan = () => {
   }, [search, data]);
 
   const handleDetailClick = (perner: string) => {
-    navigate(`/penilaian/${perner}`); // Navigasi ke halaman detail
+    navigate(`/penilaian/${perner}`);
   };
 
   return (
@@ -157,7 +180,7 @@ const ListKaryawan = () => {
           <div className="flex gap-2 mb-4">
             <p className="text-xl text-[#FF0000]">#</p>
             <p className="text-xl text-gray-300">Elevating Your Future</p>
-          </div>          
+          </div>
           <h1 className="text-6xl font-bold">Penilaian Karyawan</h1>
         </div>
       </div>
@@ -226,9 +249,9 @@ const ListKaryawan = () => {
                 <TableHead>Kategori</TableHead>
                 <TableHead>Bulan</TableHead>
                 <TableHead>Tahun</TableHead>
-                <TableHead>Aksi</TableHead>
-
-
+                {userRole === 4 ? ( // Hanya tampilkan header kolom Aksi jika role 1 atau 2
+                  <TableHead>Aksi</TableHead>
+                ) : null}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -244,6 +267,7 @@ const ListKaryawan = () => {
                     <TableCell>{karyawan.kategori_hasil_penilaian || "-"}</TableCell>
                     <TableCell>{karyawan.bulan_pemberian || "-"}</TableCell>
                     <TableCell>{karyawan.tahun_pemberian || "-"}</TableCell>
+                    {userRole === 4 ? ( // Hanya tampilkan kolom Aksi jika role 1 atau 2
                       <TableCell>
                         <Button
                           onClick={() => handleDetailClick(karyawan.perner)}
@@ -252,17 +276,19 @@ const ListKaryawan = () => {
                           Detail
                         </Button>
                       </TableCell>
+                    ) : null}
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center">
+                  <TableCell colSpan={userRole == 4 ? 10 : 9} className="text-center">
                     Tidak ada data ditemukan
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
+
         </>
       )}
     </div>

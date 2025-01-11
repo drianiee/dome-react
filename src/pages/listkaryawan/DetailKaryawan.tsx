@@ -6,7 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { jwtDecode } from "jwt-decode";
 // import { Label } from "@/components/ui/label";
+
+type TokenPayload = {
+  id_roles: number;
+  [key: string]: any;
+};
 
 type DetailKaryawan = {
   perner: string;
@@ -110,6 +116,8 @@ const DetailKaryawan = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [userRole, setUserRole] = useState<number | null>(null); // State untuk role pengguna
+
 
   const handleCopyPerner = () => {
     if (data) {
@@ -139,6 +147,18 @@ const DetailKaryawan = () => {
 
     getData();
   }, [perner]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded: TokenPayload = jwtDecode(token);
+        setUserRole(decoded.id_roles); // Simpan role pengguna
+      } catch (err) {
+        console.error("Failed to decode token:", err);
+      }
+    }
+  }, []);
 
   const handleSave = async () => {
     try {
@@ -213,27 +233,27 @@ const DetailKaryawan = () => {
             </Button>
           </div>
         </div>
-        {[1, 2].includes(parseInt(localStorage.getItem("role") || "0", 10)) && (
-        <div className="flex">
-          <Button
-            variant="outline"
-            className={`flex items-center gap-2 px-4 py-2 text-base ${
-              isEditing
-                ? "" // Warna biru untuk "Cancel"
-                : "bg-red-100 text-red-500 hover:bg-[#CF3C3C] hover:text-white" // Warna merah untuk "Edit"
-            }`}
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            {!isEditing && <Pencil className="w-5 h-5" />} {/* Tambahkan ikon jika tidak sedang mengedit */}
-            {isEditing ? "Cancel" : "Edit Data"}
-          </Button>
-            {isEditing && (
-            <Button className="ml-4 px-4 py-2 text-base bg-red-100 text-red-500 hover:bg-[#CF3C3C] hover:text-white" onClick={handleSave}>
-              Save
+        {userRole === 1 || userRole == 2 ? ( 
+          <div className="flex">
+            <Button
+              variant="outline"
+              className={`flex items-center gap-2 px-4 py-2 text-base ${
+                isEditing
+                  ? "" // Warna biru untuk "Cancel"
+                  : "bg-red-100 text-red-500 hover:bg-[#CF3C3C] hover:text-white" // Warna merah untuk "Edit"
+              }`}
+              onClick={() => setIsEditing(!isEditing)}
+            >
+              {!isEditing && <Pencil className="w-5 h-5" />} {/* Tambahkan ikon jika tidak sedang mengedit */}
+              {isEditing ? "Cancel" : "Edit Data"}
             </Button>
-          )}
-        </div>
-        )}
+              {isEditing && (
+              <Button className="ml-4 px-4 py-2 text-base bg-red-100 text-red-500 hover:bg-[#CF3C3C] hover:text-white" onClick={handleSave}>
+                Save
+              </Button>
+            )}
+          </div>
+        ) : null}
       </div>
 
       {/* Detail Section */}

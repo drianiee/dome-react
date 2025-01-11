@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Untuk navigasi
 import ListKaryawanHeader from '../../assets/ListKaryawanHeader.png';
+import { jwtDecode } from "jwt-decode";
+
 import {
   Select,
   SelectContent,
@@ -96,6 +98,11 @@ const fetchAllData = async (): Promise<Karyawan[]> => {
   return allData;
 };
 
+type TokenPayload = {
+  id_roles: number;
+  [key: string]: any;
+};
+
 const ListKaryawan = () => {
   const [data, setData] = useState<Karyawan[]>([]); // Data asli
   const [search, setSearch] = useState<string>(""); // State untuk pencarian
@@ -105,6 +112,7 @@ const ListKaryawan = () => {
   const navigate = useNavigate();
   const [filterSumberAnggaran, setFilterSumberAnggaran] = useState("");
   const [filterUnit, setFilterUnit] = useState("");
+  const [userRole, setUserRole] = useState<number | null>(null); // State untuk role pengguna
 
   // Filter data di sini (variabel lokal, bukan state)
   const filteredData = data
@@ -152,6 +160,19 @@ const ListKaryawan = () => {
     
       getData();
     }, [currentPage, search]);
+
+      // Ambil role dari token saat komponen dimuat
+      useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token) {
+          try {
+            const decoded: TokenPayload = jwtDecode(token);
+            setUserRole(decoded.id_roles); // Simpan role pengguna
+          } catch (err) {
+            console.error("Failed to decode token:", err);
+          }
+        }
+      }, []);
     
 
   const handlePageChange = (page: number): void => {
@@ -218,7 +239,7 @@ const ListKaryawan = () => {
             </div>
 
             {/* Filter by Unit */}
-            {[1, 2].includes(parseInt(localStorage.getItem("role") || "0", 10)) && (
+            {userRole === 1 || userRole == 2 ? ( 
               <div className="w-1/5">
                 <Select onValueChange={setFilterUnit}>
                   <SelectTrigger>
@@ -236,7 +257,7 @@ const ListKaryawan = () => {
                   </SelectContent>
                 </Select>
               </div>
-            )}
+            ) : null}
 
           </div>
 

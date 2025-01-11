@@ -6,6 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CheckCircle, AlertCircle, AlertTriangle, XCircle, Pencil, Clipboard} from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { jwtDecode } from "jwt-decode";
+
+type TokenPayload = {
+  id_roles: number;
+  [key: string]: any;
+};
 
 type DetailMutasi = {
   status_mutasi: string;
@@ -97,6 +103,7 @@ const DetailMutasi = () => {
   const [unitData, setUnitData] = useState<UnitData[]>([]);
   const [subUnitOptions, setSubUnitOptions] = useState<string[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [userRole, setUserRole] = useState<number | null>(null); // State untuk role pengguna
 
   
   const rejectMutasi = async (perner: string, reason: string) => {
@@ -206,6 +213,18 @@ const DetailMutasi = () => {
     getData();
   }, [perner]);
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded: TokenPayload = jwtDecode(token);
+        setUserRole(decoded.id_roles); // Simpan role pengguna
+      } catch (err) {
+        console.error("Failed to decode token:", err);
+      }
+    }
+  }, []);
+
   // const handleReject = () => {
   //   setIsRejecting(true);
   // };
@@ -313,7 +332,7 @@ const DetailMutasi = () => {
             </Button>
           </div>
         </div>
-        {[2].includes(parseInt(localStorage.getItem("role") || "0", 10)) &&
+        {userRole === 2 ? (
           !["Disetujui", "Ditolak"].includes(data.status_mutasi) && ( // Tambahkan kondisi
             <div className="flex">
               <Button
@@ -337,9 +356,10 @@ const DetailMutasi = () => {
                 </Button>
               )}
             </div>
-          )}
+          )
+        ) : null}
 
-          {parseInt(localStorage.getItem("role") || "0", 10) === 4 && (
+        {userRole === 4 ? (
           !["Disetujui", "Ditolak"].includes(data.status_mutasi) && ( // Tambahkan kondisi
             <div className="flex gap-4 justify-center mt-6">
               <Button
@@ -349,16 +369,18 @@ const DetailMutasi = () => {
                 Setujui
               </Button>
               <Button
-              onClick={() => {
-                setIsDialogOpen(true);
-                // handleReject();
-              }}              
-              className="bg-red-100 text-[#991B1B] hover:bg-[#CF3C3C] hover:text-white"
+                onClick={() => {
+                  setIsDialogOpen(true);
+                  // handleReject();
+                }}
+                className="bg-red-100 text-[#991B1B] hover:bg-[#CF3C3C] hover:text-white"
               >
                 Tolak
               </Button>
             </div>
-          ))}
+          )
+        ) : null}
+
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent>
             <DialogHeader>
