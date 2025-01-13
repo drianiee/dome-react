@@ -1,17 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Home, Inbox, LogOut, User, List } from "lucide-react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import LogoTelkom from "../assets/LogoTelkom.png";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import axios from "axios";
+import {jwtDecode} from "jwt-decode";
+
+type TokenPayload = {
+  id: number;
+  username: string;
+  name: string;
+  id_roles: number;
+  iat: number;
+  exp: number;
+};
 
 export function AppSidebar() {
+  const [userRole, setUserRole] = useState<number | null>(null);
+  
   const navigate = useNavigate();
   const location = useLocation();
 
   const user = localStorage.getItem("user");
   const userData = user ? JSON.parse(user) : null;
-  const role = localStorage.getItem("role"); // Ambil role dari localStorage
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const roleMapping: { [key: string]: string } = {
@@ -33,6 +44,17 @@ export function AppSidebar() {
   const [newPassword, setNewPassword] = useState("");
   const [changePasswordSuccess, setChangePasswordSuccess] = useState(false);
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded: TokenPayload = jwtDecode(token);
+        setUserRole(decoded.id_roles); // Simpan id_roles sebagai number
+      } catch (err) {
+        console.error("Error decoding JWT:", err);
+      }
+    }
+  }, []);
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -76,8 +98,9 @@ export function AppSidebar() {
         {userData && (
           <div className="text-left">
             <div className="text-sm font-medium text-gray-700">{userData.name}</div>
-            {role && <div className="text-xs text-gray-700">{roleMapping[role] || "Unknown Role"}</div>}
+            <div className="text-xs text-gray-700">{userRole !== null ? roleMapping[userRole.toString()] : "Unknown Role"}</div>
             <div className="text-xs text-gray-700">{userData.username}</div>
+
           </div>
         )}
       </button>
@@ -101,19 +124,17 @@ export function AppSidebar() {
                     className="block w-full mt-1 p-2 border border-gray-300 rounded-md cursor-default bg-gray-100 focus:outline-none"
                   />
                 </div>
-                {role && (
                   <div className="text-sm text-gray-700">
                     <label htmlFor="role">Role:</label>
                     <input
                       type="text"
                       id="role"
-                      value={roleMapping[role] || "Unknown Role"}
+                      value={userRole !== null ? roleMapping[userRole.toString()] : "Unknown Role"}
                       readOnly
                       tabIndex={-1}
                       className="block w-full mt-1 p-2 border border-gray-300 rounded-md cursor-default bg-gray-100 focus:outline-none"
                     />
                   </div>
-                )}
                 <div className="text-sm text-gray-700">
                   <label htmlFor="username">Email:</label>
                   <input
