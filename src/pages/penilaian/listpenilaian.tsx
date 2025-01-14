@@ -139,25 +139,37 @@ const ListKaryawan = () => {
     };
     getInitialData();
   }, []);
-
   useEffect(() => {
-    if (!filterBulan || !filterTahun) return;
-
-    const getFilteredData = async () => {
+    console.log("Filter bulan:", filterBulan, "Filter tahun:", filterTahun);
+    console.log("Filtered data:", filteredData);
+  }, [filterBulan, filterTahun, filteredData]);
+  
+  useEffect(() => {
+    const fetchData = async () => {
       try {
-        const response = await fetchFilteredData(filterBulan, filterTahun);
-        setData(response || []);
-        setFilteredData(response || []);
+        if (filterBulan && filterTahun) {
+          // Jika filter diatur, gunakan API untuk filter data
+          const response = await fetchFilteredData(filterBulan, filterTahun);
+          setData(response || []); // Set langsung hasil filter
+          setFilteredData(response || []);
+        } else {
+          // Jika tidak ada filter, panggil data awal
+          const response = await fetchInitialData();
+          setData(response || []);
+          setFilteredData(response || []);
+        }
         setError(null);
       } catch (err: any) {
-        console.error("Failed to fetch filtered data:", err.message);
+        console.error("Failed to fetch data:", err.message);
         setError("Gagal mengambil data. Periksa koneksi Anda.");
         setData([]);
       }
     };
-
-    getFilteredData();
+  
+    fetchData();
   }, [filterBulan, filterTahun]);
+  
+  
 
   useEffect(() => {
     const searchData = data.filter((karyawan) =>
@@ -196,7 +208,18 @@ const ListKaryawan = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-
+            <Select value={filterTahun} onValueChange={setFilterTahun}>
+              <SelectTrigger>
+                <SelectValue placeholder="Pilih Tahun" />
+              </SelectTrigger>
+              <SelectContent>
+                {yearOptions.map((tahun) => (
+                  <SelectItem key={tahun} value={tahun}>
+                    {tahun}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={filterBulan} onValueChange={setFilterBulan}>
               <SelectTrigger>
                 <SelectValue placeholder="Pilih Bulan" />
@@ -222,71 +245,66 @@ const ListKaryawan = () => {
                 ))}
               </SelectContent>
             </Select>
-
-            <Select value={filterTahun} onValueChange={setFilterTahun}>
-              <SelectTrigger>
-                <SelectValue placeholder="Pilih Tahun" />
-              </SelectTrigger>
-              <SelectContent>
-                {yearOptions.map((tahun) => (
-                  <SelectItem key={tahun} value={tahun}>
-                    {tahun}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Perner</TableHead>
-                <TableHead>Nama</TableHead>
-                <TableHead>Unit</TableHead>
-                <TableHead>Sub Unit</TableHead>
-                <TableHead>Posisi</TableHead>
-                <TableHead>Skor Rating</TableHead>
-                <TableHead>Kategori</TableHead>
-                <TableHead>Bulan</TableHead>
-                <TableHead>Tahun</TableHead>
-                {userRole === 4 ? ( // Hanya tampilkan header kolom Aksi jika role 1 atau 2
-                  <TableHead>Aksi</TableHead>
-                ) : null}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredData.length > 0 ? (
-                filteredData.map((karyawan) => (
-                  <TableRow key={karyawan.perner}>
-                    <TableCell>{karyawan.perner}</TableCell>
-                    <TableCell>{karyawan.nama}</TableCell>
-                    <TableCell>{karyawan.unit}</TableCell>
-                    <TableCell>{karyawan.sub_unit}</TableCell>
-                    <TableCell>{karyawan.posisi_pekerjaan}</TableCell>
-                    <TableCell>{karyawan.skor_rating}</TableCell>
-                    <TableCell>{karyawan.kategori_hasil_penilaian || "-"}</TableCell>
-                    <TableCell>{karyawan.bulan_pemberian || "-"}</TableCell>
-                    <TableCell>{karyawan.tahun_pemberian || "-"}</TableCell>
-                    {userRole === 4 ? ( // Hanya tampilkan kolom Aksi jika role 1 atau 2
-                      <TableCell>
-                        <Button
-                          onClick={() => handleDetailClick(karyawan.perner)}
-                          variant="outline"
-                        >
-                          Detail
-                        </Button>
-                      </TableCell>
-                    ) : null}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={userRole == 4 ? 10 : 9} className="text-center">
-                    Tidak ada data ditemukan
-                  </TableCell>
-                </TableRow>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Perner</TableHead>
+              <TableHead>Nama</TableHead>
+              <TableHead>Unit</TableHead>
+              <TableHead>Sub Unit</TableHead>
+              <TableHead>Posisi</TableHead>
+              <TableHead>Skor Rating</TableHead>
+              {!filterBulan && !filterTahun && (
+                <>
+                  <TableHead>Kategori</TableHead>
+                  <TableHead>Bulan</TableHead>
+                  <TableHead>Tahun</TableHead>
+                  {userRole === 4 && <TableHead>Aksi</TableHead>}
+                </>
               )}
-            </TableBody>
+            </TableRow>
+          </TableHeader>
+
+          <TableBody>
+            {filteredData.length > 0 ? (
+              filteredData.map((karyawan) => (
+                <TableRow key={karyawan.perner}>
+                  <TableCell>{karyawan.perner}</TableCell>
+                  <TableCell>{karyawan.nama}</TableCell>
+                  <TableCell>{karyawan.unit}</TableCell>
+                  <TableCell>{karyawan.sub_unit}</TableCell>
+                  <TableCell>{karyawan.posisi_pekerjaan}</TableCell>
+                  <TableCell>{karyawan.skor_rating}</TableCell>
+                  {!filterBulan && !filterTahun && (
+                    <>
+                      <TableCell>{karyawan.kategori_hasil_penilaian || "-"}</TableCell>
+                      <TableCell>{karyawan.bulan_pemberian || "-"}</TableCell>
+                      <TableCell>{karyawan.tahun_pemberian || "-"}</TableCell>
+                      {userRole === 4 && (
+                        <TableCell>
+                          <Button
+                            onClick={() => handleDetailClick(karyawan.perner)}
+                            variant="outline"
+                          >
+                            Detail
+                          </Button>
+                        </TableCell>
+                      )}
+                    </>
+                  )}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={userRole === 4 ? (filterBulan || filterTahun ? 7 : 10) : filterBulan || filterTahun ? 6 : 9} className="text-center">
+                  Tidak ada data ditemukan
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+
           </Table>
 
         </>

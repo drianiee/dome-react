@@ -225,15 +225,6 @@ const DetailMutasi = () => {
     }
   }, []);
 
-  // const handleReject = () => {
-  //   setIsRejecting(true);
-  // };
-
-  // const handleCancel = () => {
-  //   setIsRejecting(false);
-  //   setReason("");
-  // };
-
   const handleSave = async () => {
     try {
       await updateMutasi(perner!, {
@@ -446,11 +437,15 @@ const DetailMutasi = () => {
               </div>
               <div>
                 <p className="text-sm text-[#ABABAB]">NIK Atasan</p>
-                <p className="text-base font-semibold">{data.nik_atasan}</p>
+                <p className="text-base font-semibold">
+                  {data.nik_atasan !== null && data.nik_atasan !== undefined ? data.nik_atasan : "Belum Ditentukan"}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-[#ABABAB]">Nama Atasan</p>
-                <p className="text-base font-semibold">{data.nama_atasan}</p>
+                <p className="text-base font-semibold">
+                  {data.nama_atasan !== null && data.nama_atasan !== undefined ? data.nama_atasan : "Belum Ditentukan"}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-[#ABABAB]">Posisi</p>

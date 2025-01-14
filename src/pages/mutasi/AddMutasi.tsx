@@ -96,7 +96,7 @@ const AddMutasi = () => {
   const [dropdownData, setDropdownData] = useState<DropdownData[]>([]);
   const [unitBaru, setUnitBaru] = useState<string>("");
   const [subUnitBaru, setSubUnitBaru] = useState<string>("");
-  const [kotaBaru, setKotaBaru] = useState<string>("");
+  // const [kotaBaru, setKotaBaru] = useState<string>("");
   const [posisiBaru, setPosisiBaru] = useState<string>("");
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -173,7 +173,7 @@ const AddMutasi = () => {
           perner: karyawanData?.perner,
           unit_baru: unitBaru,
           sub_unit_baru: subUnitBaru,
-          kota_baru: kotaBaru,
+          // kota_baru: kotaBaru,
           posisi_baru: posisiBaru,
         }),
       }
@@ -310,7 +310,7 @@ const AddMutasi = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div>
+                  {/* <div>
                     <Label>Kota Baru</Label>
                     <Input
                       value={kotaBaru}
@@ -318,7 +318,7 @@ const AddMutasi = () => {
                       placeholder="Masukkan Kota"
                       required
                     />
-                  </div>
+                  </div> */}
                   <div>
                     <Label>Posisi Baru</Label>
                     <Input
