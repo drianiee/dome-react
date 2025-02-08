@@ -12,6 +12,7 @@ import AddMutasi from "./pages/mutasi/AddMutasi";
 
 import ListPenilaian from "./pages/penilaian/listpenilaian"
 import PenilaianDetail from "./pages/penilaian/PenilaianDetail";
+import FilteredPenilaian from "./pages/penilaian/FilteredPenilaian";
 
 function App() {
   return (
@@ -91,6 +92,14 @@ function App() {
           element={
             <Layout>
               <ListPenilaian />
+            </Layout>
+          }
+        />
+        <Route
+          path="/penilaian/filtered-data"
+          element={
+            <Layout>
+              <FilteredPenilaian />
             </Layout>
           }
         />
