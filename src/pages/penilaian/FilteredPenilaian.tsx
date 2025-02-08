@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 // import { Button } from "@/components/ui/button";
 import ListKaryawanHeader from "../../assets/ListKaryawanHeader.png";
+import { ArrowLeft } from "lucide-react";
 
 type Karyawan = {
   perner: string;
@@ -41,6 +42,8 @@ const fetchFilteredData = async (bulan: string, tahun: string): Promise<Karyawan
 };
 
 const FilteredPenilaian = () => {
+    const navigate = useNavigate();
+
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const bulan = params.get("bulan") || "";
@@ -79,10 +82,18 @@ const FilteredPenilaian = () => {
           </div>
           <h1 className="text-6xl font-bold">Penilaian Karyawan - {bulan} {tahun}</h1>
         </div>
-      </div>      
+      </div>    
+      <button
+          onClick={() => navigate(-1)}
+          className="flex items-center text-gray-700 hover:text-black transition-all mb-8"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          <span className="text-xl font-semibold text-blue-900">Penilaian Karyawan</span>
+        </button>  
       {error ? (
         <div className="text-red-500 text-center">{error}</div>
       ) : (
+        
         <Table>
           <TableHeader>
             <TableRow>

@@ -52,7 +52,7 @@ const fetchInitialData = async (): Promise<Karyawan[]> => {
   return await response.json();
 };
 
-const ListKaryawan = () => {
+const ListPenilaian = () => {
   const navigate = useNavigate();
   const [data, setData] = useState<Karyawan[]>([]);
   const [filteredData, setFilteredData] = useState<Karyawan[]>([]);
@@ -108,7 +108,7 @@ const ListKaryawan = () => {
         <Input type="text" placeholder="Cari karyawan..." value={search} onChange={(e) => setSearch(e.target.value)} />
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline">Filter Bulan & Tahun</Button>
+            <Button className="bg-red-500 hover:bg-red-600 text-white">Filter Bulan & Tahun</Button>
           </DialogTrigger>
           <DialogContent>
             <h2 className="text-xl font-semibold mb-4">Pilih Bulan & Tahun</h2>
@@ -120,7 +120,7 @@ const ListKaryawan = () => {
               <SelectTrigger><SelectValue placeholder="Pilih Tahun" /></SelectTrigger>
               <SelectContent>{yearOptions.map(tahun => <SelectItem key={tahun} value={tahun}>{tahun}</SelectItem>)}</SelectContent>
             </Select>
-            <Button onClick={handleFilterSubmit} className="w-full">Terapkan Filter</Button>
+            <Button onClick={handleFilterSubmit} className="w-full bg-red-500 hover:bg-red-600">Terapkan Filter</Button>
           </DialogContent>
         </Dialog>
       </div>
@@ -176,4 +176,4 @@ const ListKaryawan = () => {
   );
 };
 
-export default ListKaryawan;
+export default ListPenilaian;
