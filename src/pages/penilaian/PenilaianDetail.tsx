@@ -5,6 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Clipboard } from "lucide-react";
 
+const bulanOptions = [
+  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+  "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+];
+
+const tahunOptions = Array.from({ length: 11 }, (_, i) => 2020 + i);
+
+
 const fetchKaryawanDetail = async (perner: string) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -65,8 +73,8 @@ const PenilaianDetail = () => {
     organization_commitments: "",
     performance: "",
     initiative: "",
-    bulan_pemberian: "",
-    tahun_pemberian: "",
+    bulan_pemberian: "Februari",
+    tahun_pemberian: 2025,
   });
 
   const handleCopyPerner = () => {
@@ -90,10 +98,10 @@ const PenilaianDetail = () => {
     fetchData();
   }, [perner]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
   
-    // Daftar nama kolom yang memerlukan validasi angka tanpa nol di awal
+    // Daftar nama kolom yang harus berupa angka tanpa nol di awal
     const fieldsWithNumberValidation = [
       "customer_service_orientation",
       "achievment_orientation",
@@ -104,20 +112,24 @@ const PenilaianDetail = () => {
       "initiative",
     ];
   
-    // Validasi angka tanpa nol di awal
+    // Jika field termasuk validasi angka, pastikan hanya angka yang masuk
     if (fieldsWithNumberValidation.includes(name)) {
       if (/^(?:[1-9]\d*)?$/.test(value)) {
         setRatingData((prev) => ({ ...prev, [name]: parseInt(value, 10) || "" }));
       }
-    } else {
-      // Untuk kolom tanpa validasi khusus (misalnya, teks)
+    } 
+    // Jika field adalah dropdown bulan_pemberian atau tahun_pemberian
+    else if (name === "bulan_pemberian" || name === "tahun_pemberian") {
       setRatingData((prev) => ({
         ...prev,
-        [name]: name === "tahun_pemberian" ? parseInt(value, 10) || "" : value,
+        [name]: name === "tahun_pemberian" ? parseInt(value, 10) : value,
       }));
+    } 
+    // Untuk field lain tanpa validasi khusus
+    else {
+      setRatingData((prev) => ({ ...prev, [name]: value }));
     }
   };
-  
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -356,29 +368,40 @@ const PenilaianDetail = () => {
               <label className="text-sm text-gray-500" htmlFor="bulan_pemberian">
                 Bulan Pemberian
               </label>
-              <Input
-                type="text"
+              <select
                 id="bulan_pemberian"
                 name="bulan_pemberian"
                 value={ratingData.bulan_pemberian}
                 onChange={handleInputChange}
-                placeholder="Masukkan bulan"
+                className="border border-gray-300 rounded-md w-full p-2"
                 required
-              />
+              >
+                {bulanOptions.map((bulan) => (
+                  <option key={bulan} value={bulan}>
+                    {bulan}
+                  </option>
+                ))}
+              </select>
+
             </div>
             <div>
               <label className="text-sm text-gray-500" htmlFor="tahun_pemberian">
                 Tahun Pemberian
               </label>
-              <Input
-                type="text"
+              <select
                 id="tahun_pemberian"
                 name="tahun_pemberian"
                 value={ratingData.tahun_pemberian}
                 onChange={handleInputChange}
-                placeholder="Masukkan tahun"
+                className="border border-gray-300 rounded-md w-full p-2"
                 required
-              />
+              >
+                {tahunOptions.map((tahun) => (
+                  <option key={tahun} value={tahun}>
+                    {tahun}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <Button
