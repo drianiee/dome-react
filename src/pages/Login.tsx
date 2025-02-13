@@ -42,9 +42,9 @@ const Login = () => {
       const { username, name, id_roles } = decodedToken;
 
       // Console log the decoded user data
-      console.log("Username:", username);
-      console.log("Name:", name);
-      console.log("Role ID:", id_roles);
+      // console.log("Username:", username);
+      // console.log("Name:", name);
+      // console.log("Role ID:", id_roles);
 
       // Save decoded user data to localStorage
       localStorage.setItem(
